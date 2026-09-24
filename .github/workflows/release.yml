@@ -1,0 +1,63 @@
+# Builds an ad-hoc signed WrangURL.app when a release is published and attaches it to the release.
+# The app is not notarized, so Gatekeeper blocks it on first launch; use scripts/release.sh
+# locally for a Developer ID signed, notarized DMG.
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    # NSGlassEffectView needs the macOS 26 SDK.
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          # Tags like v1.2.3 become MARKETING_VERSION 1.2.3; the run number becomes the build number.
+          xcodebuild build -quiet \
+            -project WrangURL.xcodeproj \
+            -scheme WrangURL \
+            -configuration Release \
+            -destination 'generic/platform=macOS' \
+            -derivedDataPath build/DerivedData \
+            MARKETING_VERSION="${TAG#v}" \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGN_STYLE=Manual
+
+      - name: Verify signature
+        run: |
+          APP=build/DerivedData/Build/Products/Release/WrangURL.app
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          if codesign -d --entitlements - "$APP" 2>/dev/null | grep -q get-task-allow; then
+            echo "::error::release build has the get-task-allow entitlement"
+            exit 1
+          fi
+
+      - name: Package
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          ditto -c -k --keepParent \
+            build/DerivedData/Build/Products/Release/WrangURL.app \
+            "WrangURL-${TAG#v}.zip"
+
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$TAG" "WrangURL-${TAG#v}.zip" --clobber

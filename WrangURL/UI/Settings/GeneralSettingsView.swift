@@ -97,7 +97,7 @@ struct GeneralSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 680, height: 520)
+        .frame(width: 680, height: 580)
     }
 
     private var automaticFallbackName: String {

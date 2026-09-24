@@ -54,7 +54,7 @@ final class SettingsWindowController {
         let window = NSWindow(contentViewController: tabController)
         window.styleMask = [.titled, .closable, .miniaturizable]
         window.toolbarStyle = .preference
-        window.setContentSize(NSSize(width: 680, height: 520))
+        window.setContentSize(NSSize(width: 680, height: 580))
 
         let managedWindow = ManagedWindow(window: window)
         self.managedWindow = managedWindow

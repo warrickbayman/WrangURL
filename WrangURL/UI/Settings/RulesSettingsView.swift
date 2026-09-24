@@ -71,7 +71,7 @@ struct RulesSettingsView: View {
             URLTesterView()
                 .padding(12)
         }
-        .frame(width: 680, height: 520)
+        .frame(width: 680, height: 580)
         #if DEBUG
         // Launch with `-DebugEditRule <index>` to open the editor directly (for UI work).
         .task {

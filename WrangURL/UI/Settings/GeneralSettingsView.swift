@@ -6,6 +6,7 @@ struct GeneralSettingsView: View {
     @Environment(DefaultBrowserManager.self) private var defaultBrowser
     @Environment(URLRouter.self) private var router
     @Environment(LoginItemManager.self) private var loginItem
+    @Environment(UpdateManager.self) private var updates
     @Environment(OnboardingWindowController.self) private var onboarding
 
     var body: some View {
@@ -69,6 +70,17 @@ struct GeneralSettingsView: View {
                 }
                 if let error = loginItem.lastError {
                     Text(error).foregroundStyle(.red)
+                }
+            }
+
+            Section("Updates") {
+                Toggle("Check for updates automatically", isOn: Binding(
+                    get: { updates.automaticallyChecksForUpdates },
+                    set: { updates.automaticallyChecksForUpdates = $0 }
+                ))
+                LabeledContent("Version \(updates.currentVersion)") {
+                    Button("Check Now") { updates.checkForUpdates() }
+                        .disabled(!updates.canCheckForUpdates)
                 }
             }
 

@@ -29,8 +29,7 @@ final class BrowserRegistry {
                 guard let id = Bundle(url: appURL)?.bundleIdentifier,
                       id != Bundle.main.bundleIdentifier,
                       seen.insert(id).inserted else { return nil }
-                let name = FileManager.default.displayName(atPath: appURL.path)
-                return Browser(id: id, name: name.replacing(/\.app$/, with: ""), url: appURL)
+                return Browser(id: id, name: Self.displayName(of: appURL), url: appURL)
             }
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
@@ -39,8 +38,22 @@ final class BrowserRegistry {
         browsers.first { $0.id == id }
     }
 
+    /// Like `browser(withID:)`, but also finds apps hidden from the list (e.g. in unusual locations).
+    func resolve(_ id: String) -> Browser? {
+        if let browser = browser(withID: id) {
+            return browser
+        }
+        guard id != Bundle.main.bundleIdentifier,
+              let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: id) else { return nil }
+        return Browser(id: id, name: Self.displayName(of: appURL), url: appURL)
+    }
+
     func icon(for browser: Browser) -> NSImage {
         NSWorkspace.shared.icon(forFile: browser.url.path)
+    }
+
+    private static func displayName(of appURL: URL) -> String {
+        FileManager.default.displayName(atPath: appURL.path).replacing(/\.app$/, with: "")
     }
 
     /// Hides apps that register for https but aren't browsers a user installed,

@@ -18,6 +18,7 @@ final class URLRouter {
 
     @ObservationIgnored private let config: ConfigStore
     @ObservationIgnored private let browsers: BrowserRegistry
+    @ObservationIgnored private let picker = BrowserPickerController()
     @ObservationIgnored private var pending: [URL] = []
     @ObservationIgnored private var isReady = false
     @ObservationIgnored private var matcherCache: (rules: [Rule], matcher: RuleMatcher)?
@@ -83,9 +84,17 @@ final class URLRouter {
     }
 
     private func presentPicker(for url: URL, browserIDs: [String], rule: Rule?) {
-        // Milestone 4 replaces this with the picker panel.
-        Self.logger.notice("Picker not implemented yet; using first of \(browserIDs, privacy: .public)")
-        open(url, inBrowserWithID: browserIDs[0], rule: rule)
+        let choices = browserIDs.compactMap(browsers.resolve)
+        guard choices.count > 1 else {
+            if let only = choices.first {
+                open(url, inBrowserWithID: only.id, rule: rule)
+            }
+            return
+        }
+        picker.present(url: url, browsers: choices) { [weak self] browser in
+            guard let self, let browser else { return }
+            self.open(url, inBrowserWithID: browser.id, rule: rule)
+        }
     }
 
     private func open(_ url: URL, inBrowserWithID browserID: String, rule: Rule?) {
@@ -106,8 +115,7 @@ final class URLRouter {
             }
         }
 
-        let name = browsers.browser(withID: browserID)?.name
-            ?? FileManager.default.displayName(atPath: appURL.path).replacing(/\.app$/, with: "")
+        let name = browsers.resolve(browserID)?.name ?? appURL.lastPathComponent
         recent.insert(Entry(url: url, date: .now, targetName: name, ruleName: rule?.name), at: 0)
         if recent.count > Self.recentLimit {
             recent.removeLast(recent.count - Self.recentLimit)

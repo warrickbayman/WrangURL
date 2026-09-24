@@ -1,3 +1,6 @@
+[![Tests](https://github.com/warrickbayman/WrangURL/actions/workflows/tests.yml/badge.svg)](https://github.com/warrickbayman/WrangURL/actions/workflows/tests.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/warrickbayman/wrangurl)](https://github.com/warrickbayman/WrangURL/releases/latest)
+
 # WrangURL
 
 WrangURL is a macOS menu bar app that opens each link in the right browser. You write rules that match URLs, and WrangURL sends matching links to the browser you choose. If a rule lists more than one browser, a picker lets you choose each time.

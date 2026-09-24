@@ -1,0 +1,38 @@
+# Runs the unit tests on pushes to main and on pull requests. The release workflow also calls it,
+# so a release is only built once the tests pass.
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    # NSGlassEffectView needs the macOS 26 SDK.
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Test
+        run: |
+          xcodebuild test \
+            -project WrangURL.xcodeproj \
+            -scheme WrangURL \
+            -destination 'platform=macOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGN_STYLE=Manual \
+            2>&1 | grep -v com.apple.linkd.autoShortcut
+          # grep hides the test host's harmless linkd errors; keep xcodebuild's exit status.
+          exit "${PIPESTATUS[0]}"

@@ -1,7 +1,8 @@
 # Builds WrangURL.app when a release is published, signs it with the self-signed "WrangURL Self-Signed"
 # certificate and attaches it to the release, along with a Sparkle appcast.xml that installed copies
 # check for updates. The app is not notarized, so Gatekeeper blocks it on first launch; use
-# scripts/release.sh locally for a Developer ID signed, notarized DMG.
+# scripts/release.sh locally for a Developer ID signed, notarized DMG. The tests (tests.yml) run first
+# and must pass.
 #
 # Requires these secrets:
 #   SPARKLE_PRIVATE_KEY           the EdDSA key whose public half is SUPublicEDKey in project.yml.
@@ -21,11 +22,15 @@ env:
   SPARKLE_VERSION: 2.10.0
 
 jobs:
+  test:
+    uses: ./.github/workflows/tests.yml
+
   build:
+    needs: test
     # NSGlassEffectView needs the macOS 26 SDK.
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install XcodeGen
         run: brew install xcodegen

@@ -76,4 +76,6 @@ Debug builds accept launch arguments for inspecting UI without clicking. For exa
 - `-DebugOnboardingStep 0-3` opens the setup assistant on that step.
 - `-DebugShowPicker <bundleIDs,…>` (plus optional `-DebugPickerURL <url>`) shows the picker. `docs/picker.png` was captured this way.
 
+`docs/` is also the GitHub Pages site (`index.html`, `style.css`, `site.js`, no build step). Its screenshots in `docs/images/` were captured this way in light (`-NSRequiresAquaSystemAppearance YES`) and dark variants, using a demo `config.json`.
+
 The debug build shares its sandbox container, and so its `config.json`, with any installed copy of WrangURL: `~/Library/Containers/com.thepublicgood.wrangurl/Data/Library/Application Support/WrangURL/`. Back that file up before experimenting with rules, and restore it afterwards.

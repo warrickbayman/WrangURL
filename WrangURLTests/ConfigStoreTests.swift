@@ -30,6 +30,7 @@ struct ConfigStoreTests {
 
         let config = ConfigStore.load(from: fileURL)
         #expect(config.settings == AppSettings())
+        #expect(!config.settings.hasCompletedOnboarding)
         let rule = try #require(config.rules.first)
         #expect(rule.kind == .simple)
         #expect(rule.isEnabled)

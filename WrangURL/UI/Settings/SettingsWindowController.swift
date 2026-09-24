@@ -30,22 +30,17 @@ final class SettingsWindowController {
     /// Called each time the window is shown, e.g. to refresh the browser list.
     @ObservationIgnored var onShow: () -> Void = {}
 
-    @ObservationIgnored private var window: NSWindow?
+    @ObservationIgnored private var managedWindow: ManagedWindow?
     @ObservationIgnored private let tabController = NSTabViewController()
 
     func show(tab: SettingsTab = .general) {
         onShow()
-        let window = window ?? makeWindow()
+        let managedWindow = managedWindow ?? makeWindow()
         tabController.selectedTabViewItemIndex = tab.rawValue
-
-        // Menubar-only apps have no Dock icon; show one while Settings is open so
-        // the window can be found with ⌘-Tab.
-        NSApp.setActivationPolicy(.regular)
-        NSApp.activate()
-        window.makeKeyAndOrderFront(nil)
+        managedWindow.show()
     }
 
-    private func makeWindow() -> NSWindow {
+    private func makeWindow() -> ManagedWindow {
         tabController.tabStyle = .toolbar
         for tab in SettingsTab.allCases {
             let content = NSHostingController(rootView: makeContent(tab))
@@ -59,17 +54,10 @@ final class SettingsWindowController {
         let window = NSWindow(contentViewController: tabController)
         window.styleMask = [.titled, .closable, .miniaturizable]
         window.toolbarStyle = .preference
-        window.isReleasedWhenClosed = false
         window.setContentSize(NSSize(width: 680, height: 520))
-        window.center()
 
-        NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { _ in
-            MainActor.assumeIsolated {
-                _ = NSApp.setActivationPolicy(.accessory)
-            }
-        }
-
-        self.window = window
-        return window
+        let managedWindow = ManagedWindow(window: window)
+        self.managedWindow = managedWindow
+        return managedWindow
     }
 }

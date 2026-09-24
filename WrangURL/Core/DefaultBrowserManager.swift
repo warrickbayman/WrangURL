@@ -17,6 +17,16 @@ final class DefaultBrowserManager {
     init(config: ConfigStore) {
         self.config = config
         refresh()
+
+        // There's no notification for default-browser changes. Re-check whenever the user
+        // switches apps, e.g. on leaving System Settings, so the menubar icon stays accurate.
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.refresh()
+            }
+        }
     }
 
     /// Bundle identifier of the app currently handling https URLs.
@@ -27,11 +37,13 @@ final class DefaultBrowserManager {
     }
 
     func refresh() {
-        isDefault = Self.schemes.allSatisfy { scheme in
-            guard let probe = URL(string: "\(scheme)://example.com"),
-                  let handler = NSWorkspace.shared.urlForApplication(toOpen: probe) else { return false }
-            return Self.isWrangURL(handler)
-        }
+        isDefault = Self.schemes.allSatisfy(Self.isHandler)
+    }
+
+    private static func isHandler(for scheme: String) -> Bool {
+        guard let probe = URL(string: "\(scheme)://example.com"),
+              let handler = NSWorkspace.shared.urlForApplication(toOpen: probe) else { return false }
+        return isWrangURL(handler)
     }
 
     /// Compares the path as well as the bundle ID: the sandbox can't read bundles in
@@ -52,17 +64,23 @@ final class DefaultBrowserManager {
     }
 
     /// macOS shows its own confirmation dialog; the user may decline.
+    ///
+    /// Confirming the dialog for http also makes WrangURL the handler for https, and a
+    /// second request then fails ("The file couldn't be opened"). So schemes already
+    /// handled are skipped, and success is judged by the final state, not each call.
     func makeDefault() async {
         captureFallbackIfNeeded()
-        do {
-            for scheme in Self.schemes {
+        var failure: (any Error)?
+        for scheme in Self.schemes where !Self.isHandler(for: scheme) {
+            do {
                 try await NSWorkspace.shared.setDefaultApplication(at: Bundle.main.bundleURL, toOpenURLsWithScheme: scheme)
+            } catch {
+                let nsError = error as NSError
+                Self.logger.error("Failed to set default for \(scheme, privacy: .public): \(nsError.domain, privacy: .public) \(nsError.code) \(nsError.localizedDescription, privacy: .public)")
+                failure = error
             }
-            lastError = nil
-        } catch {
-            Self.logger.error("Failed to set default browser: \(error.localizedDescription, privacy: .public)")
-            lastError = error.localizedDescription
         }
         refresh()
+        lastError = isDefault ? nil : failure?.localizedDescription ?? "WrangURL wasn't set as the default browser."
     }
 }

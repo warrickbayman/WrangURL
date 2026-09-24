@@ -5,6 +5,7 @@ struct MenuBarView: View {
     @Environment(BrowserRegistry.self) private var browsers
     @Environment(URLRouter.self) private var router
     @Environment(DefaultBrowserManager.self) private var defaultBrowser
+    @Environment(LoginItemManager.self) private var loginItem
     @Environment(SettingsWindowController.self) private var settingsWindow
 
     var body: some View {
@@ -58,6 +59,10 @@ struct MenuBarView: View {
         Button("Edit Rules…") { settingsWindow.show(tab: .rules) }
         Button("Settings…") { settingsWindow.show(tab: .general) }
             .keyboardShortcut(",")
+        Toggle("Open at Login", isOn: Binding(
+            get: { loginItem.isEnabled },
+            set: { loginItem.setEnabled($0) }
+        ))
 
         Divider()
 
@@ -68,6 +73,7 @@ struct MenuBarView: View {
         .onAppear {
             defaultBrowser.refresh()
             browsers.refresh()
+            loginItem.refresh()
         }
     }
 
@@ -91,6 +97,17 @@ struct MenuBarView: View {
             return "\(url) → \(entry.targetName) (\(rule))"
         }
         return "\(url) → \(entry.targetName)"
+    }
+}
+
+/// The menubar icon. Shows a warning when WrangURL isn't the default browser,
+/// since links then bypass it silently.
+struct MenuBarLabel: View {
+    @Environment(DefaultBrowserManager.self) private var defaultBrowser
+
+    var body: some View {
+        Image(systemName: defaultBrowser.isDefault ? "arrow.triangle.branch" : "exclamationmark.triangle")
+            .accessibilityLabel(defaultBrowser.isDefault ? "WrangURL" : "WrangURL is not the default browser")
     }
 }
 

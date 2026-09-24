@@ -11,6 +11,7 @@ struct AppSettings: Codable, Equatable, Sendable {
     /// Bundle identifier of the fallback browser. `nil` until onboarding has run.
     var fallbackBrowserID: String?
     var unmatchedBehavior: UnmatchedBehavior = .openFallback
+    var hasCompletedOnboarding = false
 }
 
 extension AppSettings {
@@ -18,6 +19,7 @@ extension AppSettings {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         fallbackBrowserID = try container.decodeIfPresent(String.self, forKey: .fallbackBrowserID)
         unmatchedBehavior = try container.decodeIfPresent(UnmatchedBehavior.self, forKey: .unmatchedBehavior) ?? .openFallback
+        hasCompletedOnboarding = try container.decodeIfPresent(Bool.self, forKey: .hasCompletedOnboarding) ?? false
     }
 }
 

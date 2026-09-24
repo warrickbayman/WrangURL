@@ -174,7 +174,14 @@ enum UnmatchedBehavior: String, Codable {
 - Settings uses an AppKit window (`NSTabViewController` with toolbar tabs) hosting SwiftUI views, not a SwiftUI `Settings` scene. A menubar-only app can't reliably open that scene from outside a view: `showSettingsWindow:` no longer works, and `openSettings` is only available inside views.
 - While Settings is open, the app switches to the `.regular` activation policy, so it gets a Dock icon and a place in ⌘-Tab. It switches back to `.accessory` when the window closes.
 - The sandbox can't read app bundles in the home folder, so the entitlements include a read-only exception for `~/Applications`, where some users install browsers. The default-browser check also compares the app's path, because the sandbox can't read an Xcode build in `~/Library/Developer`.
-- Debug builds accept `-DebugSettingsTab <general|rules>` and `-DebugEditRule <index>` launch arguments, which open Settings or the rule editor directly for UI work.
+- Debug builds accept these launch arguments, which open screens directly for UI work:
+  - `-DebugSettingsTab <general|rules>` opens Settings on that tab.
+  - `-DebugEditRule <index>` opens the rule editor.
+  - `-DebugInsertionIndex <n>` draws the browser drop line at that position.
+  - `-DebugOnboardingStep <0-3>` opens the setup assistant on that step.
+- When the app is hosting the unit tests (`XCTestConfigurationFilePath` is set), it skips startup side effects: it doesn't record the fallback browser or open the setup assistant.
+- Setup is marked complete when its window closes by any means, so it doesn't reappear on every launch. Settings → General → Run Setup Again… reopens it.
+- There's no notification when the default browser changes, so WrangURL re-checks whenever the user switches apps. The menubar icon shows a warning while WrangURL isn't the default.
 - In zsh, `log` is a shell builtin, so use `/usr/bin/log stream --predicate 'subsystem == "com.thepublicgood.wrangurl"'` to view the app's logs.
 - Sparkle for auto-updates can be added later.
 
@@ -198,7 +205,7 @@ enum UnmatchedBehavior: String, Codable {
    - General pane, including the fallback browser and unmatched behavior.
    - Rules list with reordering.
    - Rule editor with the URL tester.
-6. **Default browser & login item management,** plus onboarding.
+6. ✅ **Default browser & login item management,** plus onboarding.
 7. **Polish.** Import/export, app icon, template menubar icon, and a notarized build.
 
 ## 12. Future ideas

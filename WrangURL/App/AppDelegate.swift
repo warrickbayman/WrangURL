@@ -7,7 +7,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let browsers: BrowserRegistry
     let router: URLRouter
     let defaultBrowser: DefaultBrowserManager
+    let loginItem = LoginItemManager()
     let settingsWindow = SettingsWindowController()
+    let onboardingWindow = OnboardingWindowController()
+
+    /// The app hosts the unit tests; skip startup side effects so tests don't
+    /// open windows or change the user's config.
+    static let isRunningTests = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
 
     override init() {
         config = ConfigStore()
@@ -25,14 +31,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         settingsWindow.onShow = { [unowned self] in
             browsers.refresh()
             defaultBrowser.refresh()
+            loginItem.refresh()
+        }
+
+        onboardingWindow.makeContent = { [unowned self] step, finish in
+            AnyView(OnboardingView(step: step, onFinish: finish).appEnvironment(self))
+        }
+        onboardingWindow.onFinish = { [unowned self] openRules in
+            config.update { $0.settings.hasCompletedOnboarding = true }
+            if openRules {
+                settingsWindow.show(tab: .rules)
+            }
         }
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        defaultBrowser.captureFallbackIfNeeded()
         // On a cold launch triggered by a link, macOS may deliver the URL before
         // launch finishes. The router queues it until we mark it ready here.
         router.markReady()
+
+        guard !Self.isRunningTests else { return }
+
+        defaultBrowser.captureFallbackIfNeeded()
+        if !config.config.settings.hasCompletedOnboarding {
+            onboardingWindow.show(step: Self.debugOnboardingStep ?? .fallback)
+        }
 
         #if DEBUG
         // Launch with `-DebugSettingsTab <general|rules>` to open Settings directly (for UI work).
@@ -40,6 +63,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
            let tab = SettingsTab.allCases.first(where: { $0.title.lowercased() == name }) {
             settingsWindow.show(tab: tab)
         }
+        if let step = Self.debugOnboardingStep {
+            onboardingWindow.show(step: step)
+        }
+        #endif
+    }
+
+    /// Launch with `-DebugOnboardingStep <0-3>` to open setup on a given step (debug builds only).
+    private static var debugOnboardingStep: OnboardingStep? {
+        #if DEBUG
+        UserDefaults.standard.string(forKey: "DebugOnboardingStep").flatMap(Int.init).flatMap(OnboardingStep.init)
+        #else
+        nil
         #endif
     }
 

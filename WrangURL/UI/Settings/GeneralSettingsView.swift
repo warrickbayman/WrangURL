@@ -5,6 +5,8 @@ struct GeneralSettingsView: View {
     @Environment(BrowserRegistry.self) private var browsers
     @Environment(DefaultBrowserManager.self) private var defaultBrowser
     @Environment(URLRouter.self) private var router
+    @Environment(LoginItemManager.self) private var loginItem
+    @Environment(OnboardingWindowController.self) private var onboarding
 
     var body: some View {
         Form {
@@ -57,6 +59,19 @@ struct GeneralSettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
+            Section("Startup") {
+                Toggle("Open WrangURL at login", isOn: Binding(
+                    get: { loginItem.isEnabled },
+                    set: { loginItem.setEnabled($0) }
+                ))
+                if loginItem.requiresApproval {
+                    LoginItemApprovalNote()
+                }
+                if let error = loginItem.lastError {
+                    Text(error).foregroundStyle(.red)
+                }
+            }
+
             Section("Configuration") {
                 LabeledContent("Config file") {
                     HStack {
@@ -69,6 +84,9 @@ struct GeneralSettingsView: View {
                         }
                         .help("Re-read the file after editing it by hand")
                     }
+                }
+                LabeledContent("Setup assistant") {
+                    Button("Run Setup Again…") { onboarding.show() }
                 }
             }
         }

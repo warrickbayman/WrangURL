@@ -5,8 +5,11 @@ struct WrangURLApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        MenuBarExtra("WrangURL", systemImage: "arrow.triangle.branch") {
+        MenuBarExtra {
             MenuBarView()
+                .appEnvironment(appDelegate)
+        } label: {
+            MenuBarLabel()
                 .appEnvironment(appDelegate)
         }
     }
@@ -18,6 +21,8 @@ extension View {
             .environment(app.browsers)
             .environment(app.router)
             .environment(app.defaultBrowser)
+            .environment(app.loginItem)
             .environment(app.settingsWindow)
+            .environment(app.onboardingWindow)
     }
 }

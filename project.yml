@@ -1,0 +1,70 @@
+name: WrangURL
+options:
+  bundleIdPrefix: com.thepublicgood
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  WrangURL:
+    type: application
+    platform: macOS
+    sources:
+      - path: WrangURL
+        excludes:
+          - Info.plist
+          - WrangURL.entitlements
+    info:
+      path: WrangURL/Info.plist
+      properties:
+        CFBundleDisplayName: WrangURL
+        LSUIElement: true
+        LSApplicationCategoryType: public.app-category.utilities
+        NSHumanReadableCopyright: ""
+        CFBundleURLTypes:
+          - CFBundleURLName: Web site URL
+            CFBundleTypeRole: Viewer
+            CFBundleURLSchemes: [http, https]
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: HTML document
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Default
+            LSItemContentTypes: [public.html, public.xhtml]
+    entitlements:
+      path: WrangURL/WrangURL.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.thepublicgood.wrangurl
+        # Ad-hoc signing for local development; switch to Developer ID for distribution.
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        ENABLE_HARDENED_RUNTIME: YES
+        SWIFT_STRICT_CONCURRENCY: complete
+  WrangURLTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [WrangURLTests]
+    dependencies:
+      - target: WrangURL
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.thepublicgood.wrangurl.tests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+schemes:
+  WrangURL:
+    build:
+      targets:
+        WrangURL: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets: [WrangURLTests]

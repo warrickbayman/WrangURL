@@ -179,6 +179,7 @@ enum UnmatchedBehavior: String, Codable {
   - `-DebugEditRule <index>` opens the rule editor.
   - `-DebugInsertionIndex <n>` draws the browser drop line at that position.
   - `-DebugOnboardingStep <0-3>` opens the setup assistant on that step.
+  - `-DebugShowPicker <bundle IDs>` shows the picker with those browsers (comma-separated). `-DebugPickerURL <url>` sets the link it displays. Choosing a browser does nothing.
 - When the app is hosting the unit tests (`XCTestConfigurationFilePath` is set), it skips startup side effects: it doesn't record the fallback browser or open the setup assistant.
 - Setup is marked complete when its window closes by any means, so it doesn't reappear on every launch. Settings → General → Run Setup Again… reopens it.
 - There's no notification when the default browser changes, so WrangURL re-checks whenever the user switches apps. The menubar icon shows a warning while WrangURL isn't the default.

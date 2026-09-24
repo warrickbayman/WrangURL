@@ -66,8 +66,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let step = Self.debugOnboardingStep {
             onboardingWindow.show(step: step)
         }
+        // Launch with `-DebugShowPicker <bundle IDs, comma-separated>` to show the picker
+        // with those browsers, e.g. for screenshots. Choosing a browser does nothing.
+        if let ids = UserDefaults.standard.string(forKey: "DebugShowPicker") {
+            let choices = ids.split(separator: ",").compactMap { browsers.resolve(String($0)) }
+            let url = URL(string: UserDefaults.standard.string(forKey: "DebugPickerURL") ?? "http://localhost:3000/dashboard")!
+            debugPicker.present(url: url, browsers: choices) { _ in }
+        }
         #endif
     }
+
+    #if DEBUG
+    private let debugPicker = BrowserPickerController()
+    #endif
 
     /// Launch with `-DebugOnboardingStep <0-3>` to open setup on a given step (debug builds only).
     private static var debugOnboardingStep: OnboardingStep? {

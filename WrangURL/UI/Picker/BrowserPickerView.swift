@@ -62,7 +62,6 @@ struct BrowserPickerView: View {
             .foregroundStyle(.secondary)
         }
         .padding(14)
-        .pickerBackground()
         .fixedSize()
     }
 }
@@ -105,16 +104,5 @@ private struct BrowserChoice: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Open in \(browser.name)")
-    }
-}
-
-private extension View {
-    @ViewBuilder
-    func pickerBackground() -> some View {
-        if #available(macOS 26, *) {
-            glassEffect(.regular, in: .rect(cornerRadius: 16))
-        } else {
-            background(.regularMaterial, in: .rect(cornerRadius: 16))
-        }
     }
 }

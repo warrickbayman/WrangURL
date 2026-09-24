@@ -7,9 +7,12 @@ final class PickerPanel: NSPanel {
     var onKeyDown: ((NSEvent) -> Bool)?
     var onResignKey: (() -> Void)?
 
+    static let cornerRadius: CGFloat = 16
+
     init(contentView: NSView) {
+        let size = contentView.fittingSize
         super.init(
-            contentRect: NSRect(origin: .zero, size: contentView.fittingSize),
+            contentRect: NSRect(origin: .zero, size: size),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -23,7 +26,46 @@ final class PickerPanel: NSPanel {
         hidesOnDeactivate = false
         isReleasedWhenClosed = false
         animationBehavior = .utilityWindow
-        self.contentView = contentView
+        self.contentView = Self.roundedBackground(around: contentView, size: size)
+    }
+
+    /// The window's shape comes from a masked `NSVisualEffectView`: the mask makes the window
+    /// itself rounded, so its shadow and edge follow the corners. On its own, a SwiftUI
+    /// background or an `NSGlassEffectView` draws rounded but leaves the window rectangular,
+    /// with the shadow showing as square corners. On macOS 26 the glass sits inside the mask.
+    private static func roundedBackground(around content: NSView, size: NSSize) -> NSView {
+        content.frame = NSRect(origin: .zero, size: size)
+        content.autoresizingMask = [.width, .height]
+
+        let effect = NSVisualEffectView(frame: content.frame)
+        effect.material = .popover
+        effect.blendingMode = .behindWindow
+        effect.state = .active
+        // A mask image (not a layer corner radius) also shapes the behind-window blur and the shadow.
+        effect.maskImage = roundedMask(radius: cornerRadius)
+
+        if #available(macOS 26, *) {
+            let glass = NSGlassEffectView(frame: content.frame)
+            glass.autoresizingMask = [.width, .height]
+            glass.cornerRadius = cornerRadius
+            glass.contentView = content
+            effect.addSubview(glass)
+        } else {
+            effect.addSubview(content)
+        }
+        return effect
+    }
+
+    private static func roundedMask(radius: CGFloat) -> NSImage {
+        let edge = radius * 2 + 1
+        let image = NSImage(size: NSSize(width: edge, height: edge), flipped: false) { rect in
+            NSColor.black.setFill()
+            NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius).fill()
+            return true
+        }
+        image.capInsets = NSEdgeInsets(top: radius, left: radius, bottom: radius, right: radius)
+        image.resizingMode = .stretch
+        return image
     }
 
     override var canBecomeKey: Bool { true }

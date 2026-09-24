@@ -67,6 +67,7 @@ struct MenuBarView: View {
 
         Button("Check for Updates…") { updates.checkForUpdates() }
             .disabled(!updates.canCheckForUpdates)
+        Button("WrangURL Help") { WrangURLHelp.open() }
 
         Divider()
 

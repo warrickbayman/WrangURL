@@ -85,6 +85,12 @@ struct GeneralSettingsView: View {
                         .help("Re-read the file after editing it by hand")
                     }
                 }
+                LabeledContent("Rules and settings") {
+                    HStack {
+                        Button("Import…") { ConfigTransfer.import(into: config) }
+                        Button("Export…") { ConfigTransfer.export(config) }
+                    }
+                }
                 LabeledContent("Setup assistant") {
                     Button("Run Setup Again…") { onboarding.show() }
                 }

@@ -67,15 +67,25 @@ struct OnboardingView: View {
 // MARK: - Steps
 
 private struct StepHeader: View {
-    let symbol: String
+    /// An SF Symbol name, or nil to show the app icon.
+    var symbol: String?
     let title: String
     let message: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: symbol)
-                .font(.system(size: 34, weight: .medium))
-                .foregroundStyle(.tint)
+            if let symbol {
+                Image(systemName: symbol)
+                    .font(.system(size: 34, weight: .medium))
+                    .foregroundStyle(.tint)
+            } else {
+                // From the asset catalog rather than NSApp.applicationIconImage, which comes
+                // from the system icon cache and can be stale after the icon changes.
+                Image(nsImage: NSImage(named: "AppIcon") ?? NSApp.applicationIconImage)
+                    .resizable()
+                    .frame(width: 64, height: 64)
+                    .padding(-6)
+            }
             Text(title)
                 .font(.title.weight(.semibold))
             Text(message)
@@ -94,7 +104,6 @@ private struct FallbackStep: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             StepHeader(
-                symbol: "arrow.triangle.branch",
                 title: "Welcome to WrangURL",
                 message: "WrangURL sends each link you open to the right browser, based on rules you set. First, choose the browser for links that no rule covers."
             )

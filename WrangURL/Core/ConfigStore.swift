@@ -23,6 +23,21 @@ final class ConfigStore {
         config = Self.load(from: fileURL)
     }
 
+    /// Re-reads the file, e.g. after it was edited by hand.
+    func reload() {
+        config = Self.load(from: fileURL)
+    }
+
+    /// Writes the current config if no file exists yet, so it can be revealed or edited.
+    func ensureFileExists() {
+        guard !FileManager.default.fileExists(atPath: fileURL.path) else { return }
+        do {
+            try Self.write(config, to: fileURL)
+        } catch {
+            Self.logger.error("Failed to save config: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
     func update(_ change: (inout Config) -> Void) {
         var updated = config
         change(&updated)

@@ -188,7 +188,7 @@ enum UnmatchedBehavior: String, Codable {
    - wildcards,
    - scheme-less patterns,
    - invalid regexes.
-3. **Router.** Single-browser routing, fallback, unmatched behavior, and the cold-launch queue.
+3. ✅ **Router.** Single-browser routing, fallback, unmatched behavior, and the cold-launch queue.
 4. **Picker panel.** Multi-browser choice with keyboard shortcuts, reused for unmatched URLs.
 5. **Menubar & Settings UI.**
    - General pane, including the fallback browser and unmatched behavior.

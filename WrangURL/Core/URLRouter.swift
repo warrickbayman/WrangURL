@@ -2,9 +2,7 @@ import AppKit
 import Observation
 import os
 
-/// Receives URLs opened on the system and forwards them to a browser.
-///
-/// Spike: every URL is forwarded to Safari. Rule matching replaces this in milestone 3.
+/// Receives URLs opened on the system and sends each one to the browser its rules select.
 @MainActor
 @Observable
 final class URLRouter {
@@ -13,16 +11,24 @@ final class URLRouter {
         let url: URL
         let date: Date
         let targetName: String
+        let ruleName: String?
     }
 
     private(set) var recent: [Entry] = []
 
+    @ObservationIgnored private let config: ConfigStore
+    @ObservationIgnored private let browsers: BrowserRegistry
     @ObservationIgnored private var pending: [URL] = []
     @ObservationIgnored private var isReady = false
+    @ObservationIgnored private var matcherCache: (rules: [Rule], matcher: RuleMatcher)?
 
-    private static let spikeTargetBundleID = "com.apple.Safari"
     private static let recentLimit = 10
     private static let logger = Logger(subsystem: "com.thepublicgood.wrangurl", category: "router")
+
+    init(config: ConfigStore, browsers: BrowserRegistry) {
+        self.config = config
+        self.browsers = browsers
+    }
 
     func markReady() {
         isReady = true
@@ -40,11 +46,51 @@ final class URLRouter {
         urls.forEach(route)
     }
 
-    private func route(_ url: URL) {
-        Self.logger.info("Received \(url.absoluteString, privacy: .public)")
+    var planner: RoutePlanner {
+        let ownID = Bundle.main.bundleIdentifier
+        return RoutePlanner(
+            settings: config.config.settings,
+            installedBrowserIDs: browsers.browsers.map(\.id),
+            isAvailable: { id in
+                id != ownID && NSWorkspace.shared.urlForApplication(withBundleIdentifier: id) != nil
+            }
+        )
+    }
 
-        guard let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: Self.spikeTargetBundleID) else {
-            Self.logger.error("Target browser \(Self.spikeTargetBundleID, privacy: .public) is not installed")
+    private var matcher: RuleMatcher {
+        let rules = config.config.rules
+        if let cache = matcherCache, cache.rules == rules {
+            return cache.matcher
+        }
+        let matcher = RuleMatcher(rules: rules)
+        matcherCache = (rules, matcher)
+        return matcher
+    }
+
+    private func route(_ url: URL) {
+        let rule = matcher.match(url)
+        let decision = planner.decide(for: url, matchedRule: rule)
+        Self.logger.info("Received \(url.absoluteString, privacy: .public); rule: \(rule?.name ?? "none", privacy: .public); decision: \(String(describing: decision), privacy: .public)")
+
+        switch decision {
+        case .open(let browserID):
+            open(url, inBrowserWithID: browserID, rule: rule)
+        case .pick(let browserIDs):
+            presentPicker(for: url, browserIDs: browserIDs, rule: rule)
+        case .noBrowserAvailable:
+            Self.logger.error("No browser available for \(url.absoluteString, privacy: .public)")
+        }
+    }
+
+    private func presentPicker(for url: URL, browserIDs: [String], rule: Rule?) {
+        // Milestone 4 replaces this with the picker panel.
+        Self.logger.notice("Picker not implemented yet; using first of \(browserIDs, privacy: .public)")
+        open(url, inBrowserWithID: browserIDs[0], rule: rule)
+    }
+
+    private func open(_ url: URL, inBrowserWithID browserID: String, rule: Rule?) {
+        guard let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: browserID) else {
+            Self.logger.error("Browser \(browserID, privacy: .public) is not installed")
             return
         }
         // Never hand a URL back to ourselves, or we'd loop forever.
@@ -57,13 +103,12 @@ final class URLRouter {
         NSWorkspace.shared.open([url], withApplicationAt: appURL, configuration: NSWorkspace.OpenConfiguration()) { _, error in
             if let error {
                 logger.error("Failed to open \(url.absoluteString, privacy: .public): \(error.localizedDescription, privacy: .public)")
-            } else {
-                logger.info("Opened \(url.absoluteString, privacy: .public) in \(appURL.lastPathComponent, privacy: .public)")
             }
         }
 
-        let name = FileManager.default.displayName(atPath: appURL.path)
-        recent.insert(Entry(url: url, date: .now, targetName: name), at: 0)
+        let name = browsers.browser(withID: browserID)?.name
+            ?? FileManager.default.displayName(atPath: appURL.path).replacing(/\.app$/, with: "")
+        recent.insert(Entry(url: url, date: .now, targetName: name, ruleName: rule?.name), at: 0)
         if recent.count > Self.recentLimit {
             recent.removeLast(recent.count - Self.recentLimit)
         }

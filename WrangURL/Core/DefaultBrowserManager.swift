@@ -30,8 +30,15 @@ final class DefaultBrowserManager {
         isDefault = Self.schemes.allSatisfy { scheme in
             guard let probe = URL(string: "\(scheme)://example.com"),
                   let handler = NSWorkspace.shared.urlForApplication(toOpen: probe) else { return false }
-            return Bundle(url: handler)?.bundleIdentifier == Bundle.main.bundleIdentifier
+            return Self.isWrangURL(handler)
         }
+    }
+
+    /// Compares the path as well as the bundle ID: the sandbox can't read bundles in
+    /// arbitrary locations (e.g. an Xcode build in ~/Library/Developer).
+    private static func isWrangURL(_ appURL: URL) -> Bool {
+        appURL.standardizedFileURL == Bundle.main.bundleURL.standardizedFileURL
+            || Bundle(url: appURL)?.bundleIdentifier == Bundle.main.bundleIdentifier
     }
 
     /// Remembers the user's current browser as the fallback, unless one is already set.

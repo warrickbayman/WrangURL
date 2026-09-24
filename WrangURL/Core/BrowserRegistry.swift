@@ -14,6 +14,9 @@ struct Browser: Identifiable, Hashable, Sendable {
 final class BrowserRegistry {
     private(set) var browsers: [Browser] = []
 
+    @ObservationIgnored private var iconCache: [String: NSImage] = [:]
+    @ObservationIgnored private var menuIconCache: [String: NSImage] = [:]
+
     init() {
         refresh()
     }
@@ -50,6 +53,28 @@ final class BrowserRegistry {
 
     func icon(for browser: Browser) -> NSImage {
         NSWorkspace.shared.icon(forFile: browser.url.path)
+    }
+
+    /// Full-size icon for SwiftUI views (size it with `.resizable().frame(...)`).
+    func icon(forID id: String) -> NSImage? {
+        if let cached = iconCache[id] {
+            return cached
+        }
+        guard let browser = resolve(id) else { return nil }
+        let icon = icon(for: browser)
+        iconCache[id] = icon
+        return icon
+    }
+
+    /// 16pt icon for menus and pickers, which ignore SwiftUI frame modifiers.
+    func menuIcon(forID id: String) -> NSImage? {
+        if let cached = menuIconCache[id] {
+            return cached
+        }
+        guard let icon = icon(forID: id)?.copy() as? NSImage else { return nil }
+        icon.size = NSSize(width: 16, height: 16)
+        menuIconCache[id] = icon
+        return icon
     }
 
     private static func displayName(of appURL: URL) -> String {

@@ -171,6 +171,10 @@ enum UnmatchedBehavior: String, Codable {
 ## Notes from the spike
 
 - `urlsForApplications(toOpen:)` also returns non-user browsers, such as Playwright's "Google Chrome for Testing" in `~/Library/Caches`. `BrowserRegistry` should hide apps outside `/Applications`, `~/Applications` and system locations, or let users hide them.
+- Settings uses an AppKit window (`NSTabViewController` with toolbar tabs) hosting SwiftUI views, not a SwiftUI `Settings` scene. A menubar-only app can't reliably open that scene from outside a view: `showSettingsWindow:` no longer works, and `openSettings` is only available inside views.
+- While Settings is open, the app switches to the `.regular` activation policy, so it gets a Dock icon and a place in ⌘-Tab. It switches back to `.accessory` when the window closes.
+- The sandbox can't read app bundles in the home folder, so the entitlements include a read-only exception for `~/Applications`, where some users install browsers. The default-browser check also compares the app's path, because the sandbox can't read an Xcode build in `~/Library/Developer`.
+- Debug builds accept `-DebugSettingsTab <general|rules>` and `-DebugEditRule <index>` launch arguments, which open Settings or the rule editor directly for UI work.
 - In zsh, `log` is a shell builtin, so use `/usr/bin/log stream --predicate 'subsystem == "com.thepublicgood.wrangurl"'` to view the app's logs.
 - Sparkle for auto-updates can be added later.
 
@@ -190,7 +194,7 @@ enum UnmatchedBehavior: String, Codable {
    - invalid regexes.
 3. ✅ **Router.** Single-browser routing, fallback, unmatched behavior, and the cold-launch queue.
 4. ✅ **Picker panel.** Multi-browser choice with keyboard shortcuts, reused for unmatched URLs.
-5. **Menubar & Settings UI.**
+5. ✅ **Menubar & Settings UI.**
    - General pane, including the fallback browser and unmatched behavior.
    - Rules list with reordering.
    - Rule editor with the URL tester.

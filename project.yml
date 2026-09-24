@@ -29,6 +29,10 @@ targets:
           - CFBundleURLName: Web site URL
             CFBundleTypeRole: Viewer
             CFBundleURLSchemes: [http, https]
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.thepublicgood.wrangurl.browser
+            UTTypeDescription: WrangURL Browser
+            UTTypeConformsTo: [public.data]
         CFBundleDocumentTypes:
           - CFBundleTypeName: HTML document
             CFBundleTypeRole: Viewer
@@ -38,6 +42,9 @@ targets:
       path: WrangURL/WrangURL.entitlements
       properties:
         com.apple.security.app-sandbox: true
+        # Read browsers installed per-user in ~/Applications (Developer ID only; not allowed on the App Store).
+        com.apple.security.temporary-exception.files.home-relative-path.read-only:
+          - /Applications/
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.thepublicgood.wrangurl

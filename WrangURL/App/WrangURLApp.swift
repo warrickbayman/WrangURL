@@ -6,12 +6,18 @@ struct WrangURLApp: App {
 
     var body: some Scene {
         MenuBarExtra("WrangURL", systemImage: "arrow.triangle.branch") {
-            MenuBarView(
-                config: appDelegate.config,
-                browsers: appDelegate.browsers,
-                router: appDelegate.router,
-                defaultBrowser: appDelegate.defaultBrowser
-            )
+            MenuBarView()
+                .appEnvironment(appDelegate)
         }
+    }
+}
+
+extension View {
+    func appEnvironment(_ app: AppDelegate) -> some View {
+        environment(app.config)
+            .environment(app.browsers)
+            .environment(app.router)
+            .environment(app.defaultBrowser)
+            .environment(app.settingsWindow)
     }
 }

@@ -18,6 +18,11 @@ struct Rule: Codable, Identifiable, Hashable, Sendable {
 }
 
 extension Rule {
+    /// The name, or the pattern when no name was given.
+    var displayName: String {
+        name.trimmingCharacters(in: .whitespaces).isEmpty ? pattern : name
+    }
+
     // Tolerate missing keys so older or hand-edited config files still load.
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

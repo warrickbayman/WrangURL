@@ -68,10 +68,15 @@ final class URLRouter {
         return matcher
     }
 
-    private func route(_ url: URL) {
+    /// What would happen to a URL, without opening it. Used by the URL tester.
+    func preview(_ url: URL) -> (rule: Rule?, decision: RouteDecision) {
         let rule = matcher.match(url)
-        let decision = planner.decide(for: url, matchedRule: rule)
-        Self.logger.info("Received \(url.absoluteString, privacy: .public); rule: \(rule?.name ?? "none", privacy: .public); decision: \(String(describing: decision), privacy: .public)")
+        return (rule, planner.decide(for: url, matchedRule: rule))
+    }
+
+    private func route(_ url: URL) {
+        let (rule, decision) = preview(url)
+        Self.logger.info("Received \(url.absoluteString, privacy: .public); rule: \(rule?.displayName ?? "none", privacy: .public); decision: \(String(describing: decision), privacy: .public)")
 
         switch decision {
         case .open(let browserID):
@@ -116,7 +121,7 @@ final class URLRouter {
         }
 
         let name = browsers.resolve(browserID)?.name ?? appURL.lastPathComponent
-        recent.insert(Entry(url: url, date: .now, targetName: name, ruleName: rule?.name), at: 0)
+        recent.insert(Entry(url: url, date: .now, targetName: name, ruleName: rule?.displayName), at: 0)
         if recent.count > Self.recentLimit {
             recent.removeLast(recent.count - Self.recentLimit)
         }

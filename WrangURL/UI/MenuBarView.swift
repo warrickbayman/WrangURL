@@ -1,10 +1,11 @@
 import SwiftUI
 
 struct MenuBarView: View {
-    let config: ConfigStore
-    let browsers: BrowserRegistry
-    let router: URLRouter
-    let defaultBrowser: DefaultBrowserManager
+    @Environment(ConfigStore.self) private var config
+    @Environment(BrowserRegistry.self) private var browsers
+    @Environment(URLRouter.self) private var router
+    @Environment(DefaultBrowserManager.self) private var defaultBrowser
+    @Environment(SettingsWindowController.self) private var settingsWindow
 
     var body: some View {
         if defaultBrowser.isDefault {
@@ -22,7 +23,14 @@ struct MenuBarView: View {
 
         Picker("Fallback Browser", selection: fallbackBrowserID) {
             ForEach(browsers.browsers) { browser in
-                Text(browser.name).tag(Optional(browser.id))
+                Label {
+                    Text(browser.name)
+                } icon: {
+                    if let icon = browsers.menuIcon(forID: browser.id) {
+                        Image(nsImage: icon)
+                    }
+                }
+                .tag(Optional(browser.id))
             }
         }
         Picker("When No Rule Matches", selection: unmatchedBehavior) {
@@ -47,14 +55,9 @@ struct MenuBarView: View {
 
         Divider()
 
-        // Until the Settings window exists (milestone 5), rules are edited in config.json.
-        Button("Reveal Config File") {
-            config.ensureFileExists()
-            NSWorkspace.shared.activateFileViewerSelecting([config.fileURL])
-        }
-        Button("Reload Config") {
-            config.reload()
-        }
+        Button("Edit Rules…") { settingsWindow.show(tab: .rules) }
+        Button("Settings…") { settingsWindow.show(tab: .general) }
+            .keyboardShortcut(",")
 
         Divider()
 

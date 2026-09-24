@@ -56,5 +56,18 @@
 	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string></string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>WrangURL Browser</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.thepublicgood.wrangurl.browser</string>
+		</dict>
+	</array>
 </dict>
 </plist>

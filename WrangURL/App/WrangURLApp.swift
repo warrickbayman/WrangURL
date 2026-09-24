@@ -22,6 +22,7 @@ extension View {
             .environment(app.router)
             .environment(app.defaultBrowser)
             .environment(app.loginItem)
+            .environment(app.updates)
             .environment(app.settingsWindow)
             .environment(app.onboardingWindow)
     }

@@ -42,6 +42,7 @@ The router then either opens the URL via `NSWorkspace` or shows `BrowserPickerCo
 - `URLRouter`
 - `DefaultBrowserManager`
 - `LoginItemManager`
+- `UpdateManager` (wraps Sparkle; its updater isn't started when hosting tests)
 - the two window controllers
 
 They reach SwiftUI through `View.appEnvironment(_:)` in `WrangURLApp.swift`, so a new shared object must be added there. `ConfigStore` is the single source of truth. Mutate it only via `update { }`, which writes `config.json` straight away.
@@ -61,6 +62,8 @@ They reach SwiftUI through `View.appEnvironment(_:)` in `WrangURLApp.swift`, so 
 - The router never opens a URL with WrangURL itself (loop guard).
 - When setting the default browser, confirming the `http` dialog also switches `https`. `makeDefault()` therefore skips schemes already handled and judges success by the final state.
 - Release builds set `CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO`, because notarization rejects `get-task-allow`.
+- Sparkle needs `SUEnableInstallerLauncherService`, the `-spks`/`-spki` mach-lookup exceptions and `network.client`. Its feed is `releases/latest/download/appcast.xml`, which the release workflow generates and signs with the `SPARKLE_PRIVATE_KEY` secret. Updates are accepted on the EdDSA signature.
+- Release builds from CI are built ad-hoc, then re-signed by `scripts/resign.sh` with the self-signed "WrangURL Self-Signed" certificate. Xcode won't sign with an untrusted identity. An ad-hoc designated requirement is the build's hash, so without this each update would look like a different app to macOS. Builds without a Team ID need `disable-library-validation` to load Sparkle.framework. Debug builds only work without it because of `get-task-allow`.
 
 ## Testing and manual UI checks
 

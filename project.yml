@@ -4,6 +4,10 @@ options:
   deploymentTarget:
     macOS: "14.0"
   createIntermediateGroups: true
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.10.0
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -13,6 +17,8 @@ targets:
   WrangURL:
     type: application
     platform: macOS
+    dependencies:
+      - package: Sparkle
     sources:
       - path: WrangURL
         excludes:
@@ -40,6 +46,12 @@ targets:
             CFBundleTypeRole: Viewer
             LSHandlerRank: Default
             LSItemContentTypes: [public.html, public.xhtml]
+        # Sparkle updates. The feed is attached to each GitHub release by .github/workflows/release.yml;
+        # "latest/download" always resolves to the newest non-prerelease.
+        SUFeedURL: https://github.com/warrickbayman/WrangURL/releases/latest/download/appcast.xml
+        SUPublicEDKey: nhut+67ccREm92IqayuzOH6bPokUPwdMbBxiY47jL2w=
+        # Sandboxed apps must install updates through Sparkle's installer XPC service.
+        SUEnableInstallerLauncherService: true
     entitlements:
       path: WrangURL/WrangURL.entitlements
       properties:
@@ -49,6 +61,15 @@ targets:
         # Read browsers installed per-user in ~/Applications (Developer ID only; not allowed on the App Store).
         com.apple.security.temporary-exception.files.home-relative-path.read-only:
           - /Applications/
+        # Builds without an Apple Team ID (ad-hoc or self-signed; see scripts/resign.sh) can't load
+        # the embedded Sparkle.framework under the hardened runtime's library validation.
+        com.apple.security.cs.disable-library-validation: true
+        # Sparkle fetches the update feed and archive.
+        com.apple.security.network.client: true
+        # Lets Sparkle talk to its installer, which runs outside the sandbox.
+        com.apple.security.temporary-exception.mach-lookup.global-name:
+          - $(PRODUCT_BUNDLE_IDENTIFIER)-spks
+          - $(PRODUCT_BUNDLE_IDENTIFIER)-spki
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.thepublicgood.wrangurl

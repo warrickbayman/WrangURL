@@ -8,6 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let router: URLRouter
     let defaultBrowser: DefaultBrowserManager
     let loginItem = LoginItemManager()
+    let updates = UpdateManager(startingUpdater: !AppDelegate.isRunningTests)
     let settingsWindow = SettingsWindowController()
     let onboardingWindow = OnboardingWindowController()
 

@@ -31,6 +31,7 @@ jobs:
             -scheme WrangURL \
             -destination 'platform=macOS' \
             -derivedDataPath build/DerivedData \
+            -skipPackagePluginValidation \
             CODE_SIGN_IDENTITY=- \
             CODE_SIGN_STYLE=Manual \
             2>&1 | grep -v com.apple.linkd.autoShortcut

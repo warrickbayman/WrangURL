@@ -90,8 +90,10 @@ The generated `WrangURL.xcodeproj` isn't checked in. Run `xcodegen generate` aga
 To build from the command line:
 
 ```sh
-xcodebuild -project WrangURL.xcodeproj -scheme WrangURL -configuration Release -derivedDataPath build/DerivedData build
+xcodebuild -project WrangURL.xcodeproj -scheme WrangURL -configuration Release -derivedDataPath build/DerivedData -skipPackagePluginValidation build
 ```
+
+SwiftLint runs as part of the build, with its rules in `.swiftlint.yml`. `-skipPackagePluginValidation` lets its build plugin run from the command line; in Xcode, click **Trust & Enable** the first time you build.
 
 The app is written to `build/DerivedData/Build/Products/Release/WrangURL.app`. Debug and local builds are ad-hoc signed, so they run on your own Mac without a certificate.
 
@@ -117,7 +119,7 @@ Set `SKIP_NOTARIZE=1` to build and sign without notarizing. There are more detai
 Run the tests from Xcode with **⌘U**, or from the command line:
 
 ```sh
-xcodebuild -project WrangURL.xcodeproj -scheme WrangURL -derivedDataPath build/DerivedData test
+xcodebuild -project WrangURL.xcodeproj -scheme WrangURL -derivedDataPath build/DerivedData -skipPackagePluginValidation test
 ```
 
 The tests use Swift Testing. They cover:

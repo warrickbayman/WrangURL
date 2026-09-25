@@ -170,7 +170,10 @@ struct RuleEditorView: View {
         .onDrag {
             draggingID = id
             let provider = NSItemProvider()
-            provider.registerDataRepresentation(forTypeIdentifier: UTType.wrangurlBrowser.identifier, visibility: .ownProcess) { completion in
+            provider.registerDataRepresentation(
+                forTypeIdentifier: UTType.wrangurlBrowser.identifier,
+                visibility: .ownProcess
+            ) { completion in
                 completion(Data(id.utf8), nil)
                 return nil
             }

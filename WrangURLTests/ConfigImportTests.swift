@@ -30,7 +30,11 @@ struct ConfigImportTests {
 
     @Test func replaceTakesImportedRulesAndSettingsButKeepsOnboardingState() {
         let current = config(rules: [Rule(name: "Old", pattern: "old.test", kind: .simple, browserIDs: [chrome])], fallback: chrome)
-        let imported = config(rules: [Rule(name: "New", pattern: "new.test", kind: .simple, browserIDs: [safari])], fallback: safari, onboarded: false)
+        let imported = config(
+            rules: [Rule(name: "New", pattern: "new.test", kind: .simple, browserIDs: [safari])],
+            fallback: safari,
+            onboarded: false
+        )
 
         let result = current.importing(imported, mode: .replace)
         #expect(result.rules.map(\.name) == ["New"])

@@ -1,0 +1,44 @@
+# SwiftLint runs as a build tool plugin on both targets (see project.yml).
+# Rule reference: https://realm.github.io/SwiftLint/rule-directory.html
+
+included:
+  - WrangURL
+  - WrangURLTests
+excluded:
+  - build
+  - WrangURL.xcodeproj
+
+disabled_rules:
+  - trailing_comma   # trailing commas keep diffs of multi-line lists clean
+  - todo
+
+opt_in_rules:
+  - empty_count
+  - first_where
+  - contains_over_first_not_nil
+  - last_where
+  - sorted_first_last
+  - redundant_nil_coalescing
+  - unneeded_parentheses_in_closure_argument
+  - closure_spacing
+  - operator_usage_whitespace
+  - implicit_return
+  - modifier_order
+  - toggle_bool
+  - private_swiftui_state
+
+line_length:
+  warning: 140
+  error: 200
+  ignores_urls: true
+  ignores_comments: true
+  # User-facing copy and log messages read better on one line.
+  ignores_interpolated_strings: true
+
+# SwiftUI view builders run long without being complex.
+function_body_length:
+  warning: 80
+  error: 150
+
+identifier_name:
+  excluded: [id, x, y, i, j, to, at, on, by, ui]

@@ -49,6 +49,7 @@ jobs:
             -configuration Release \
             -destination 'generic/platform=macOS' \
             -derivedDataPath build/DerivedData \
+            -skipPackagePluginValidation \
             MARKETING_VERSION="${TAG#v}" \
             CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
             CODE_SIGN_IDENTITY=- \

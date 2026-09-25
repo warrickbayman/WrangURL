@@ -8,7 +8,7 @@ Open an [issue](https://github.com/warrickbayman/WrangURL/issues). For a bug, in
 
 - your macOS version and WrangURL version (shown in the About panel)
 - the URL or pattern involved, and which browser you expected to open
-- the relevant rules from `config.json`, or an exported configuration (**Settings → General → Export…**). Remove anything private first.
+- the relevant rules from `config.json`, or an exported configuration (**Settings → General → Export…**). Remove or change anything private first.
 
 Logs often help. Collect them with:
 

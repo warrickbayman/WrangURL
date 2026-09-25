@@ -1,6 +1,5 @@
 import AppKit
 import SwiftUI
-import os
 
 /// Shows the browser picker, one URL at a time. URLs arriving while it's open are queued.
 @MainActor
@@ -17,8 +16,6 @@ final class BrowserPickerController {
     private var current: Request?
     private var model: PickerModel?
     private var panel: PickerPanel?
-
-    private static let logger = Logger(subsystem: "com.thepublicgood.wrangurl", category: "picker")
 
     /// Calls `completion` with the chosen browser, or `nil` if the user cancelled.
     func present(url: URL, browsers: [Browser], completion: @escaping Completion) {
@@ -95,9 +92,6 @@ final class BrowserPickerController {
         panel = nil
         model = nil
 
-        if browser == nil {
-            Self.logger.info("Picker cancelled for \(request.url.absoluteString, privacy: .public)")
-        }
         request.completion(browser)
         showNext()
     }

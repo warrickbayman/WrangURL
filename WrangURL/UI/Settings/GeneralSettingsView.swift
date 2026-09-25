@@ -84,6 +84,16 @@ struct GeneralSettingsView: View {
                 }
             }
 
+            Section {
+                Toggle("Include URLs in logs", isOn: logsURLs)
+            } header: {
+                Text("Privacy")
+            } footer: {
+                Text("Logged links help when troubleshooting rules. Turn this off to keep URLs out of the system log.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Configuration") {
                 LabeledContent("Config file") {
                     HStack {
@@ -122,6 +132,13 @@ struct GeneralSettingsView: View {
         Binding(
             get: { config.config.settings.fallbackBrowserID },
             set: { id in config.update { $0.settings.fallbackBrowserID = id } }
+        )
+    }
+
+    private var logsURLs: Binding<Bool> {
+        Binding(
+            get: { config.config.settings.logsURLs },
+            set: { enabled in config.update { $0.settings.logsURLs = enabled } }
         )
     }
 

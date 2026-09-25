@@ -74,9 +74,14 @@ final class URLRouter {
         return (rule, planner.decide(for: url, matchedRule: rule))
     }
 
+    /// The URL as it should appear in the log, following the "Include URLs in logs" setting.
+    private func loggable(_ url: URL) -> String {
+        config.config.settings.logsURLs ? url.absoluteString : "<URL hidden>"
+    }
+
     private func route(_ url: URL) {
         let (rule, decision) = preview(url)
-        Self.logger.info("Received \(url.absoluteString, privacy: .public); rule: \(rule?.displayName ?? "none", privacy: .public); decision: \(String(describing: decision), privacy: .public)")
+        Self.logger.info("Received \(self.loggable(url), privacy: .public); rule: \(rule?.displayName ?? "none", privacy: .public); decision: \(String(describing: decision), privacy: .public)")
 
         switch decision {
         case .open(let browserID):
@@ -84,7 +89,7 @@ final class URLRouter {
         case .pick(let browserIDs):
             presentPicker(for: url, browserIDs: browserIDs, rule: rule)
         case .noBrowserAvailable:
-            Self.logger.error("No browser available for \(url.absoluteString, privacy: .public)")
+            Self.logger.error("No browser available for \(self.loggable(url), privacy: .public)")
         }
     }
 
@@ -97,7 +102,11 @@ final class URLRouter {
             return
         }
         picker.present(url: url, browsers: choices) { [weak self] browser in
-            guard let self, let browser else { return }
+            guard let self else { return }
+            guard let browser else {
+                Self.logger.info("Picker cancelled for \(self.loggable(url), privacy: .public)")
+                return
+            }
             self.open(url, inBrowserWithID: browser.id, rule: rule)
         }
     }
@@ -114,9 +123,10 @@ final class URLRouter {
         }
 
         let logger = Self.logger
+        let loggedURL = loggable(url)
         NSWorkspace.shared.open([url], withApplicationAt: appURL, configuration: NSWorkspace.OpenConfiguration()) { _, error in
             if let error {
-                logger.error("Failed to open \(url.absoluteString, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                logger.error("Failed to open \(loggedURL, privacy: .public): \(error.localizedDescription, privacy: .public)")
             }
         }
 

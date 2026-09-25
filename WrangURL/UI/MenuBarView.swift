@@ -10,6 +10,10 @@ struct MenuBarView: View {
     @Environment(SettingsWindowController.self) private var settingsWindow
 
     var body: some View {
+        if let version = updates.pendingUpdateVersion {
+            Button("Update Available: WrangURL \(version)…") { updates.checkForUpdates() }
+            Divider()
+        }
         if defaultBrowser.isDefault {
             Text("✓ WrangURL is the default browser")
         } else {

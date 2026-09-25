@@ -94,8 +94,9 @@ private struct BrowserChoice: View {
                     .font(.caption2.monospaced())
                     .foregroundStyle(.secondary)
             }
-            .frame(width: 76)
-            .padding(.vertical, 8)
+            .frame(width: 80)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 10)
             .background {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(isSelected ? Color.accentColor.opacity(0.25) : .clear)

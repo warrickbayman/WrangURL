@@ -4,6 +4,12 @@ All notable changes to WrangURL are listed here, newest first. When a release is
 Changelog workflow (`.github/workflows/changelog.yml`) adds its section from the pull requests merged
 since the previous release. Edit entries by hand afterwards if they need rewording.
 
+## [v0.2.6](https://github.com/warrickbayman/WrangURL/releases/tag/v0.2.6) - 2026-09-25
+
+### Added
+
+- Improve spacing around picker browser items. ([#8](https://github.com/warrickbayman/WrangURL/pull/8))
+
 ## [v0.2.5](https://github.com/warrickbayman/WrangURL/releases/tag/v0.2.5) - 2026-09-25
 
 ### Fixed

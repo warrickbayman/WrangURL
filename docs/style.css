@@ -380,6 +380,9 @@ td:first-child { white-space: nowrap; }
 .cta { padding-block: clamp(3rem, 7vw, 5rem); border-top: 1px solid var(--line); }
 .cta h2 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); letter-spacing: -0.025em; margin: 0 0 0.5rem; }
 .cta p { color: var(--muted); margin: 0 0 1.5rem; }
+.sponsor { margin-top: 2rem; }
+.sponsor p { margin-bottom: 0.75rem; }
+.sponsor iframe { display: block; }
 
 .foot {
   max-width: var(--wide); margin: 0 auto;

@@ -26,7 +26,7 @@ WrangURL is the default browser, so it sees every link opened on the Mac. Issues
 - **Updates:** anything that gets an update installed without a valid EdDSA signature from the release key, or that weakens how the update feed is fetched
 - **Configuration:** a configuration file that, when imported, does something other than change rules and settings, or crashes or hangs the app. For example, a regular expression rule that hangs the app when a link is opened.
 - **Sandbox:** WrangURL reaching files, processes or services beyond what its entitlements in `project.yml` allow
-- **Privacy:** URLs leaving your Mac. WrangURL only connects to the network to check GitHub for updates. It does record URLs in the local system log. Routed URLs are logged at info level, which macOS keeps only in memory by default. A URL that fails to open is logged as an error, which macOS saves to disk.
+- **Privacy:** URLs leaving your Mac. WrangURL only connects to the network to check GitHub for updates. It does record URLs in the local system log. Routed URLs are logged at info level, which macOS keeps only in memory by default. A URL that fails to open is logged as an error, which macOS saves to disk. Turn off **Settings → General → Include URLs in logs** to leave URLs out of the log altogether.
 
 Outside the scope of this policy:
 

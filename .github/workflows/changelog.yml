@@ -1,0 +1,92 @@
+# Adds a section to CHANGELOG.md when a release is published, listing the pull requests merged since
+# the previous release, and commits it to the default branch. Pull requests are grouped by label
+# (feature/enhancement, bug/fix); unlabelled ones go under "Changed". Commits pushed straight to main
+# without a pull request aren't picked up, so add those by hand.
+#
+# Re-running it for a release that's already in CHANGELOG.md does nothing.
+name: Changelog
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: changelog
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Build changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v6
+        with:
+          toTag: ${{ github.event.release.tag_name }}
+          configurationJson: |
+            {
+              "template": "#{{CHANGELOG}}",
+              "empty_template": "- No pull requests merged in this release",
+              "pr_template": "- #{{TITLE}} ([##{{NUMBER}}](#{{URL}}))",
+              "categories": [
+                { "title": "### Added", "labels": ["feature", "enhancement"] },
+                { "title": "### Fixed", "labels": ["bug", "fix"] },
+                { "title": "### Changed", "labels": [] }
+              ]
+            }
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Update CHANGELOG.md
+        env:
+          # Passed through the environment because pull request titles are untrusted input.
+          CHANGES: ${{ steps.changelog.outputs.changelog }}
+          TAG: ${{ github.event.release.tag_name }}
+          URL: ${{ github.event.release.html_url }}
+          PUBLISHED_AT: ${{ github.event.release.published_at }}
+        run: |
+          python3 - <<'EOF'
+          import os, pathlib, sys
+
+          tag, url = os.environ["TAG"], os.environ["URL"]
+          path = pathlib.Path("CHANGELOG.md")
+          text = path.read_text() if path.exists() else "# Changelog\n"
+          if f"## [{tag}]" in text:
+              print(f"{tag} is already in CHANGELOG.md")
+              sys.exit(0)
+
+          section = f"## [{tag}]({url}) - {os.environ['PUBLISHED_AT'][:10]}\n\n{os.environ['CHANGES'].strip()}\n\n"
+          # Newest first: insert above the previous release's heading, or at the end if there is none.
+          lines = text.splitlines(keepends=True)
+          index = next((i for i, line in enumerate(lines) if line.startswith("## ")), None)
+          if index is None:
+              text = text.rstrip("\n") + "\n\n" + section
+          else:
+              text = "".join(lines[:index]) + section + "".join(lines[index:])
+          path.write_text(text.rstrip("\n") + "\n")
+          EOF
+
+      - name: Commit
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if git diff --quiet CHANGELOG.md; then
+            echo "CHANGELOG.md is unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "Update CHANGELOG.md for $TAG"
+          # The branch may have moved while the changelog was built.
+          git pull --rebase origin "$BRANCH"
+          git push origin "HEAD:$BRANCH"

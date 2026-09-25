@@ -12,6 +12,8 @@ struct AppSettings: Codable, Equatable, Sendable {
     var fallbackBrowserID: String?
     var unmatchedBehavior: UnmatchedBehavior = .openFallback
     var hasCompletedOnboarding = false
+    /// Whether URLs appear in the system log. When off, they're replaced with a placeholder.
+    var logsURLs = true
 }
 
 extension AppSettings {
@@ -20,6 +22,7 @@ extension AppSettings {
         fallbackBrowserID = try container.decodeIfPresent(String.self, forKey: .fallbackBrowserID)
         unmatchedBehavior = try container.decodeIfPresent(UnmatchedBehavior.self, forKey: .unmatchedBehavior) ?? .openFallback
         hasCompletedOnboarding = try container.decodeIfPresent(Bool.self, forKey: .hasCompletedOnboarding) ?? false
+        logsURLs = try container.decodeIfPresent(Bool.self, forKey: .logsURLs) ?? true
     }
 }
 

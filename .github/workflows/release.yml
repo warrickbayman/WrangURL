@@ -1,6 +1,14 @@
-# Builds an ad-hoc signed WrangURL.app when a release is published and attaches it to the release.
-# The app is not notarized, so Gatekeeper blocks it on first launch; use scripts/release.sh
-# locally for a Developer ID signed, notarized DMG.
+# Builds WrangURL.app when a release is published, signs it with the self-signed "WrangURL Self-Signed"
+# certificate and attaches it to the release, along with a Sparkle appcast.xml that installed copies
+# check for updates. The app is not notarized, so Gatekeeper blocks it on first launch; use
+# scripts/release.sh locally for a Developer ID signed, notarized DMG. The tests (tests.yml) run first
+# and must pass.
+#
+# Requires these secrets:
+#   SPARKLE_PRIVATE_KEY           the EdDSA key whose public half is SUPublicEDKey in project.yml.
+#                                 Export it with `generate_keys --account wrangurl -x <file>` (Sparkle's bin/).
+#   SIGNING_CERTIFICATE_P12       the base64-encoded .p12 of the "WrangURL Self-Signed" identity.
+#   SIGNING_CERTIFICATE_PASSWORD  that .p12's password.
 name: Release
 
 on:
@@ -10,12 +18,19 @@ on:
 permissions:
   contents: write
 
+env:
+  SPARKLE_VERSION: 2.10.0
+
 jobs:
+  test:
+    uses: ./.github/workflows/tests.yml
+
   build:
+    needs: test
     # NSGlassEffectView needs the macOS 26 SDK.
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -34,15 +49,45 @@ jobs:
             -configuration Release \
             -destination 'generic/platform=macOS' \
             -derivedDataPath build/DerivedData \
+            -skipPackagePluginValidation \
             MARKETING_VERSION="${TAG#v}" \
             CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
             CODE_SIGN_IDENTITY=- \
             CODE_SIGN_STYLE=Manual
 
+      - name: Sign with the self-signed certificate
+        env:
+          CERTIFICATE_P12: ${{ secrets.SIGNING_CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.SIGNING_CERTIFICATE_PASSWORD }}
+        run: |
+          if [ -z "$CERTIFICATE_P12" ] || [ -z "$CERTIFICATE_PASSWORD" ]; then
+            echo "::error::the SIGNING_CERTIFICATE_P12 and SIGNING_CERTIFICATE_PASSWORD secrets are not set"
+            exit 1
+          fi
+          # Xcode refuses an untrusted identity, so the ad-hoc build is re-signed.
+          # codesign only finds identities in keychains on the search list.
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 24)
+          echo "$CERTIFICATE_P12" | base64 --decode > "$RUNNER_TEMP/signing.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/signing.p12" -k "$KEYCHAIN" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" > /dev/null
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/signing.p12"
+
+          scripts/resign.sh build/DerivedData/Build/Products/Release/WrangURL.app "WrangURL Self-Signed"
+
       - name: Verify signature
         run: |
           APP=build/DerivedData/Build/Products/Release/WrangURL.app
           codesign --verify --deep --strict --verbose=2 "$APP"
+          # An ad-hoc designated requirement is a hash of this build, so updates would look like a different app.
+          if ! codesign -d -r- "$APP" 2>&1 | grep -q "certificate root"; then
+            echo "::error::release build isn't signed with the self-signed certificate"
+            exit 1
+          fi
           if codesign -d --entitlements - "$APP" 2>/dev/null | grep -q get-task-allow; then
             echo "::error::release build has the get-task-allow entitlement"
             exit 1
@@ -56,8 +101,34 @@ jobs:
             build/DerivedData/Build/Products/Release/WrangURL.app \
             "WrangURL-${TAG#v}.zip"
 
+      - name: Generate appcast
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          RELEASE_NOTES: ${{ github.event.release.body }}
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          if [ -z "$SPARKLE_PRIVATE_KEY" ]; then
+            echo "::error::the SPARKLE_PRIVATE_KEY secret is not set"
+            exit 1
+          fi
+          curl -sSfL -o sparkle.tar.xz \
+            "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz"
+          mkdir sparkle && tar -xf sparkle.tar.xz -C sparkle
+
+          # The appcast lists only this release; Sparkle only needs the newest one.
+          mkdir updates
+          cp "WrangURL-${TAG#v}.zip" updates/
+          printf '%s\n' "$RELEASE_NOTES" > "updates/WrangURL-${TAG#v}.md"
+          echo "$SPARKLE_PRIVATE_KEY" | sparkle/bin/generate_appcast \
+            --ed-key-file - \
+            --embed-release-notes \
+            --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/${TAG}/" \
+            --link "https://github.com/${{ github.repository }}/releases" \
+            updates
+          cat updates/appcast.xml
+
       - name: Upload to release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.release.tag_name }}
-        run: gh release upload "$TAG" "WrangURL-${TAG#v}.zip" --clobber
+        run: gh release upload "$TAG" "WrangURL-${TAG#v}.zip" updates/appcast.xml --clobber

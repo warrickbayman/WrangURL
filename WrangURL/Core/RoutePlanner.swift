@@ -33,11 +33,7 @@ struct RoutePlanner {
         if let rule = matchedRule {
             var seen = Set<String>()
             let browserIDs = rule.browserIDs.filter { isAvailable($0) && seen.insert($0).inserted }
-            switch browserIDs.count {
-            case 0: return openFallback()
-            case 1: return .open(browserID: browserIDs[0])
-            default: return .pick(browserIDs: browserIDs)
-            }
+            return browserIDs.isEmpty ? openFallback() : openOrPick(browserIDs)
         }
 
         switch settings.unmatchedBehavior {
@@ -49,11 +45,15 @@ struct RoutePlanner {
                 browserIDs.removeAll { $0 == fallback }
                 browserIDs.insert(fallback, at: 0)
             }
-            switch browserIDs.count {
-            case 0: return .noBrowserAvailable
-            case 1: return .open(browserID: browserIDs[0])
-            default: return .pick(browserIDs: browserIDs)
-            }
+            return openOrPick(browserIDs)
+        }
+    }
+
+    private func openOrPick(_ browserIDs: [String]) -> RouteDecision {
+        switch browserIDs.count {
+        case 0: .noBrowserAvailable
+        case 1: .open(browserID: browserIDs[0])
+        default: .pick(browserIDs: browserIDs)
         }
     }
 

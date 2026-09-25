@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WrangURL: open every link in the right browser</title>
+  <meta name="description" content="WrangURL is a free, open source macOS menu bar app that sends each link you open to the browser you choose, based on simple rules.">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:title" content="WrangURL">
+  <meta property="og:description" content="A macOS menu bar app that opens every link in the right browser.">
+  <meta property="og:image" content="images/icon.png">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="apple-touch-icon" href="images/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="#top">
+      <img src="images/icon.png" alt="" width="28" height="28">
+      <span>WrangURL</span>
+    </a>
+    <nav aria-label="Sections">
+      <a href="#install">Install</a>
+      <a href="#usage">Usage</a>
+      <a href="https://github.com/warrickbayman/WrangURL">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- Introduction -->
+  <section class="hero" id="top">
+    <div class="hero-copy">
+      <h1>Every link, in the <br>right browser.</h1>
+      <p class="lede">
+        WrangURL is a small macOS menu bar app that stands in as your default browser.
+        When you click a link in Slack, Mail or anywhere else, it checks your rules and
+        passes the link to the browser you chose for it. When one browser isn’t enough, it asks.
+      </p>
+      <div class="actions">
+        <a class="button primary" id="download" href="https://github.com/warrickbayman/WrangURL/releases/latest">Download for macOS</a>
+        <a class="button" href="https://github.com/warrickbayman/WrangURL">View source on GitHub</a>
+      </div>
+      <p class="fine">
+        <span id="version">Latest release on GitHub</span>. Free and open source under the MIT License. Requires macOS 14 or later.
+      </p>
+    </div>
+
+    <figure class="router" aria-label="Example: how WrangURL routes four different links">
+      <div class="router-url">
+        <span class="router-label">You click</span>
+        <code id="route-url">http://localhost:3000/dashboard</code>
+      </div>
+      <svg class="router-map" viewBox="0 0 420 240" role="img" aria-labelledby="route-caption">
+        <circle class="node-origin" cx="14" cy="120" r="7"/>
+        <path class="trunk" d="M21 120 H150"/>
+        <circle class="node-junction" cx="150" cy="120" r="5"/>
+        <path class="branch" data-browser="chrome" d="M150 120 C215 120 215 30 280 30"/>
+        <path class="branch" data-browser="brave"  d="M150 120 C215 120 215 90 280 90"/>
+        <path class="branch" data-browser="safari" d="M150 120 C215 120 215 150 280 150"/>
+        <path class="branch" data-browser="zen"    d="M150 120 C215 120 215 210 280 210"/>
+        <g class="dest" data-browser="chrome"><circle cx="286" cy="30" r="6"/><text x="302" y="36">Chrome</text></g>
+        <g class="dest" data-browser="brave"><circle cx="286" cy="90" r="6"/><text x="302" y="96">Brave</text></g>
+        <g class="dest" data-browser="safari"><circle cx="286" cy="150" r="6"/><text x="302" y="156">Safari</text></g>
+        <g class="dest" data-browser="zen"><circle cx="286" cy="210" r="6"/><text x="302" y="216">Zen</text></g>
+      </svg>
+      <figcaption id="route-caption">
+        Matches <b id="route-rule">Local development</b> (<code id="route-pattern">localhost</code>):
+        <span id="route-result">choose Chrome or Brave in the picker.</span>
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="features" aria-label="What WrangURL does">
+    <div>
+      <h2>Rules you can read</h2>
+      <p>Patterns like <code>localhost</code>, <code>*.example.com</code> or <code>github.com/myorg/*</code>. Regular expressions when you need them.</p>
+    </div>
+    <div>
+      <h2>One browser, or a choice</h2>
+      <p>A rule with one browser opens it straight away. A rule with several shows a picker by the mouse pointer.</p>
+    </div>
+    <div>
+      <h2>A fallback for the rest</h2>
+      <p>Links that match no rule open in your fallback browser, or show the picker if you’d rather decide each time.</p>
+    </div>
+    <div>
+      <h2>Stays out of the way</h2>
+      <p>Lives in the menu bar, can open at login, and updates itself from GitHub releases.</p>
+    </div>
+  </section>
+
+  <!-- Installation -->
+  <section class="doc" id="install" aria-labelledby="install-title">
+    <h2 class="section-title" id="install-title">Install WrangURL</h2>
+
+    <ol class="steps">
+      <li>
+        <h3>Download the latest release</h3>
+        <p>
+          Get <code>WrangURL-&lt;version&gt;.zip</code> from the
+          <a href="https://github.com/warrickbayman/WrangURL/releases/latest">latest GitHub release</a>.
+          Safari unzips it for you. In other browsers, double-click the zip in Downloads.
+        </p>
+      </li>
+      <li>
+        <h3>Move it to Applications</h3>
+        <p>
+          Drag <b>WrangURL.app</b> into your <b>Applications</b> folder before you open it.
+          macOS remembers where your default browser lives, so moving the app later means setting it as the default again.
+        </p>
+      </li>
+      <li>
+        <h3>Allow it past Gatekeeper</h3>
+        <p>
+          The first time you open WrangURL, macOS stops it with a message saying Apple could not verify
+          that “WrangURL” is free of malware. Click <b>Done</b>, not <b>Move to Trash</b>, then follow the steps for your macOS version.
+        </p>
+
+        <div class="gatekeeper" data-tabs>
+          <div class="tablist" role="tablist" aria-label="Ways to open WrangURL the first time">
+            <button role="tab" id="tab-sequoia" aria-controls="panel-sequoia">macOS 15 or later</button>
+            <button role="tab" id="tab-sonoma" aria-controls="panel-sonoma">macOS 14 Sonoma</button>
+            <button role="tab" id="tab-terminal" aria-controls="panel-terminal">Using Terminal</button>
+          </div>
+
+          <div class="panel" role="tabpanel" id="panel-sequoia" aria-labelledby="tab-sequoia" tabindex="0">
+            <h4 class="panel-title">macOS 15 Sequoia, macOS 26 Tahoe and later</h4>
+            <ol>
+              <li>Open <b>System Settings</b> and choose <b>Privacy &amp; Security</b>.</li>
+              <li>Scroll down to the <b>Security</b> section. You’ll see “WrangURL” was blocked to protect your Mac.</li>
+              <li>Click <b>Open Anyway</b> and enter your password or use Touch&nbsp;ID.</li>
+              <li>In the dialog that follows, click <b>Open Anyway</b> again.</li>
+            </ol>
+            <div class="mock" aria-hidden="true">
+              <div class="mock-head">Security</div>
+              <div class="mock-row">
+                <span>“WrangURL” was blocked to protect your Mac.</span>
+                <span class="mock-button">Open Anyway</span>
+              </div>
+            </div>
+            <p class="note">If you don’t see the message, open WrangURL once more so macOS blocks it again, then come back to Privacy &amp; Security.</p>
+          </div>
+
+          <div class="panel" role="tabpanel" id="panel-sonoma" aria-labelledby="tab-sonoma" tabindex="0">
+            <h4 class="panel-title">macOS 14 Sonoma</h4>
+            <ol>
+              <li>In Finder, open your <b>Applications</b> folder.</li>
+              <li>Hold <kbd>Control</kbd> and click <b>WrangURL</b>, then choose <b>Open</b> from the menu.</li>
+              <li>In the dialog that follows, click <b>Open</b>.</li>
+            </ol>
+            <p class="note">The Privacy &amp; Security route described for macOS 15 works on Sonoma too.</p>
+          </div>
+
+          <div class="panel" role="tabpanel" id="panel-terminal" aria-labelledby="tab-terminal" tabindex="0">
+            <h4 class="panel-title">Using Terminal, on any version</h4>
+            <p>Remove the quarantine flag macOS added when you downloaded the app:</p>
+            <div class="code">
+              <pre><code id="xattr-cmd">xattr -dr com.apple.quarantine /Applications/WrangURL.app</code></pre>
+              <button class="copy" type="button" data-copy="xattr-cmd">Copy</button>
+            </div>
+            <p>Then open WrangURL as usual. This only changes this one app.</p>
+          </div>
+        </div>
+
+        <details class="why">
+          <summary>Why does macOS block WrangURL?</summary>
+          <p>
+            Apple only trusts apps without a warning when they’re signed with a paid Apple Developer ID and
+            sent to Apple for notarization. WrangURL releases are signed with a self-signed certificate instead,
+            so every release carries the same identity, but Apple can’t vouch for it.
+          </p>
+          <p>
+            You only need to allow it once. Updates from <b>Check for Updates…</b> are verified with a
+            signing key before they’re installed and open without a warning. If you’d rather not trust a
+            download, you can <a href="https://github.com/warrickbayman/WrangURL#building">build WrangURL from source</a>
+            with Xcode.
+          </p>
+        </details>
+      </li>
+      <li>
+        <h3>Run the setup assistant</h3>
+        <p>
+          WrangURL opens a short setup assistant and adds its icon to the menu bar.
+          The <a href="#setup">next section</a> walks through it.
+        </p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- Usage -->
+  <section class="doc" id="usage" aria-labelledby="usage-title">
+    <h2 class="section-title" id="usage-title">Use WrangURL</h2>
+
+    <h3 id="setup">First run</h3>
+    <p>The setup assistant takes four steps. You can run it again from <b>Settings → General → Run Setup Again…</b>.</p>
+
+    <ol class="shots-strip">
+      <li>
+        <picture>
+          <source srcset="images/onboarding-0-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="images/onboarding-0-light.png" width="668" height="580" loading="lazy"
+               alt="Setup step one: a grid of installed browsers, with Zen selected as the fallback browser.">
+        </picture>
+        <p><b>Choose a fallback browser.</b> It opens links that no rule matches.</p>
+      </li>
+      <li>
+        <picture>
+          <source srcset="images/onboarding-1-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="images/onboarding-1-light.png" width="668" height="580" loading="lazy"
+               alt="Setup step two: choose between opening unmatched links in the fallback browser or asking each time.">
+        </picture>
+        <p><b>Decide what unmatched links do.</b> Open them in the fallback browser, or ask each time.</p>
+      </li>
+      <li>
+        <picture>
+          <source srcset="images/onboarding-2-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="images/onboarding-2-light.png" width="668" height="580" loading="lazy"
+               alt="Setup step three: Make WrangURL your default browser, showing that WrangURL is now the default.">
+        </picture>
+        <p><b>Make WrangURL your default browser.</b> It can only route links while it’s the default. macOS asks you to confirm.</p>
+      </li>
+      <li>
+        <picture>
+          <source srcset="images/onboarding-3-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="images/onboarding-3-light.png" width="668" height="580" loading="lazy"
+               alt="Setup step four: a switch to open WrangURL at login.">
+        </picture>
+        <p><b>Open at login,</b> if you like, so links keep working after a restart.</p>
+      </li>
+    </ol>
+
+    <h3 id="rules">Write rules</h3>
+    <p>
+      Choose <b>Edit Rules…</b> from the menu bar icon. Each rule has a pattern and one or more browsers.
+      Rules are checked from top to bottom and the first match wins, so drag them into the order you want.
+      Untick a rule to turn it off without deleting it.
+    </p>
+
+    <div class="pair">
+      <figure>
+        <picture>
+          <source srcset="images/settings-rules-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="images/settings-rules-light.png" width="748" height="736" loading="lazy"
+               alt="The Rules tab listing five rules, each with its pattern and the icons of the browsers it opens.">
+        </picture>
+        <figcaption>The Rules tab. The icons show which browsers each rule opens.</figcaption>
+      </figure>
+      <figure>
+        <picture>
+          <source srcset="images/rule-editor-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="images/rule-editor-light.png" width="748" height="736" loading="lazy"
+               alt="The rule editor for Local development: a simple pattern of localhost that opens Google Chrome or Brave Browser.">
+        </picture>
+        <figcaption>Editing a rule. With two browsers, this rule shows the picker.</figcaption>
+      </figure>
+    </div>
+
+    <h4>Simple patterns</h4>
+    <p>A simple pattern matches the host and, if you add them, the scheme, port and path. Case doesn’t matter.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">Pattern</th><th scope="col">Matches</th></tr></thead>
+        <tbody>
+          <tr><td><code>localhost</code></td><td><code>localhost</code> over http or https, on any port</td></tr>
+          <tr><td><code>http://localhost</code></td><td><code>localhost</code> over http only</td></tr>
+          <tr><td><code>localhost:3000</code></td><td><code>localhost</code> on port 3000 only</td></tr>
+          <tr><td><code>*.example.com</code></td><td><code>example.com</code> and all of its subdomains</td></tr>
+          <tr><td><code>github.com/myorg/*</code></td><td>URLs on <code>github.com</code> whose path starts with <code>/myorg/</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Regular expressions</h4>
+    <p>
+      Switch a rule’s type to <b>Regular Expression</b> to match anywhere in the full URL.
+      Regular expressions are case-sensitive. Start the pattern with <code>(?i)</code> to ignore case, for example
+      <code>(?i)^https://meet\.google\.com/</code>.
+    </p>
+
+    <h4>Test before you rely on it</h4>
+    <p>
+      Paste a link into <b>Test a URL</b> at the bottom of the Rules tab to see which rule matches and which browser
+      would open. The rule editor has its own test field for the rule you’re working on.
+    </p>
+
+    <h3 id="picker">Choose in the picker</h3>
+    <div class="side">
+      <picture>
+        <source srcset="images/picker-dark.png" media="(prefers-color-scheme: dark)">
+        <img src="images/picker-light.png" width="390" height="220" loading="lazy"
+             alt="The browser picker for http://localhost:3000/dashboard, offering Google Chrome, Brave Browser, Safari and Zen, numbered one to four.">
+      </picture>
+      <div>
+        <p>
+          When a rule lists more than one browser, the picker appears next to the mouse pointer.
+          The app you clicked the link in stays in front, so you can keep working after you choose.
+        </p>
+        <table class="keys">
+          <tbody>
+            <tr><td><kbd>1</kbd>–<kbd>9</kbd></td><td>Open in that browser</td></tr>
+            <tr><td><kbd>←</kbd> <kbd>→</kbd> or <kbd>Tab</kbd></td><td>Move the selection</td></tr>
+            <tr><td><kbd>Return</kbd></td><td>Open in the selected browser</td></tr>
+            <tr><td><kbd>⌘</kbd><kbd>C</kbd></td><td>Copy the link and close the picker</td></tr>
+            <tr><td><kbd>Esc</kbd> or click elsewhere</td><td>Cancel</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h3 id="settings">Menu bar and settings</h3>
+    <p>The menu bar icon gives you quick access to the things you change most:</p>
+    <ul>
+      <li>whether WrangURL is the default browser, with a button to set it again;</li>
+      <li>the fallback browser, and what happens when no rule matches;</li>
+      <li><b>Recent Links</b>. Choose one to copy it;</li>
+      <li><b>Edit Rules…</b>, <b>Settings…</b>, <b>Open at Login</b> and <b>Check for Updates…</b>.</li>
+    </ul>
+
+    <figure class="wide">
+      <picture>
+        <source srcset="images/settings-general-dark.png" media="(prefers-color-scheme: dark)">
+        <img src="images/settings-general-light.png" width="748" height="736" loading="lazy"
+             alt="The General tab: default browser status, fallback browser, unmatched links, startup, updates and configuration.">
+      </picture>
+      <figcaption>Settings → General.</figcaption>
+    </figure>
+
+    <p>
+      <b>Settings → General</b> covers the same routing options, plus launch at login, automatic updates and your configuration.
+      Use <b>Import…</b> and <b>Export…</b> to move your rules and settings between Macs as a JSON file.
+    </p>
+    <p>
+      Your configuration is stored in
+      <code class="path">~/Library/Containers/com.thepublicgood.wrangurl/Data/Library/Application Support/WrangURL/config.json</code>.
+      If you edit it by hand, click <b>Reload</b> in Settings → General.
+    </p>
+
+    <h3 id="troubleshooting">If something’s not right</h3>
+    <dl class="faq">
+      <dt>The menu bar icon shows ⚠︎</dt>
+      <dd>WrangURL is no longer the default browser, often because another browser asked to be. Choose <b>Set as Default Browser…</b> from the menu.</dd>
+      <dt>Links stopped opening after I moved the app</dt>
+      <dd>macOS records where the default browser lives. Open WrangURL from its new location and set it as the default again.</dd>
+      <dt>A browser is missing from the list</dt>
+      <dd>WrangURL finds browsers in <code>/Applications</code>, <code>~/Applications</code> and the system Applications folder. Move the browser into one of those.</dd>
+      <dt>Removing WrangURL</dt>
+      <dd>Pick another default browser in <b>System Settings → Desktop &amp; Dock → Default web browser</b>, quit WrangURL from its menu, then drag it to the Trash.</dd>
+    </dl>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-title">
+    <h2 id="cta-title">WrangURL is open source</h2>
+    <p>Read the code, report a problem or suggest a feature on GitHub.</p>
+    <div class="actions">
+      <a class="button primary" href="https://github.com/warrickbayman/WrangURL">Open the repository</a>
+      <a class="button" href="https://github.com/warrickbayman/WrangURL/issues">Report an issue</a>
+      <a class="button" href="https://github.com/warrickbayman/WrangURL/releases">All releases</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <p>
+    WrangURL is made by Warrick Bayman and built with Claude Code.
+    Released under the <a href="https://github.com/warrickbayman/WrangURL/blob/main/LICENSE.md">MIT License</a>.
+    Not affiliated with Apple or any browser maker.
+  </p>
+</footer>
+
+<script src="site.js"></script>
+</body>
+</html>

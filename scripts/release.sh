@@ -41,6 +41,7 @@ xcodebuild archive -quiet \
     -scheme WrangURL \
     -configuration Release \
     -archivePath "$ARCHIVE" \
+    -skipPackagePluginValidation \
     DEVELOPMENT_TEAM="$TEAM_ID" \
     CODE_SIGN_STYLE=Manual \
     CODE_SIGN_IDENTITY="$SIGNING_IDENTITY" \

@@ -56,6 +56,12 @@
 	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string></string>
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://github.com/warrickbayman/WrangURL/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>nhut+67ccREm92IqayuzOH6bPokUPwdMbBxiY47jL2w=</string>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>

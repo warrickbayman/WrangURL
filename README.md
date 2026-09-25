@@ -1,3 +1,6 @@
+[![Tests](https://github.com/warrickbayman/WrangURL/actions/workflows/tests.yml/badge.svg)](https://github.com/warrickbayman/WrangURL/actions/workflows/tests.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/warrickbayman/wrangurl)](https://github.com/warrickbayman/WrangURL/releases/latest)
+
 # WrangURL
 
 WrangURL is a macOS menu bar app that opens each link in the right browser. You write rules that match URLs, and WrangURL sends matching links to the browser you choose. If a rule lists more than one browser, a picker lets you choose each time.
@@ -64,7 +67,8 @@ The picker appears next to the mouse pointer. The app you clicked the link in st
 
 ### Settings and configuration
 
-- **Settings → General** covers the fallback browser, what to do with unmatched links, launch at login, and the default browser status.
+- **Settings → General** covers the fallback browser, what to do with unmatched links, launch at login, updates, and the default browser status.
+- WrangURL checks GitHub for new releases with [Sparkle](https://sparkle-project.org). Choose **Check for Updates…** in the menu to check now.
 - If WrangURL stops being the default browser, the menu bar icon changes to ⚠︎.
 - **Import… and Export…** save and load your rules and settings as JSON.
 - Your configuration is stored in `~/Library/Containers/com.thepublicgood.wrangurl/Data/Library/Application Support/WrangURL/config.json`. After editing the file by hand, click **Reload** in Settings → General.
@@ -86,14 +90,18 @@ The generated `WrangURL.xcodeproj` isn't checked in. Run `xcodegen generate` aga
 To build from the command line:
 
 ```sh
-xcodebuild -project WrangURL.xcodeproj -scheme WrangURL -configuration Release -derivedDataPath build/DerivedData build
+xcodebuild -project WrangURL.xcodeproj -scheme WrangURL -configuration Release -derivedDataPath build/DerivedData -skipPackagePluginValidation build
 ```
+
+SwiftLint runs as part of the build, with its rules in `.swiftlint.yml`. `-skipPackagePluginValidation` lets its build plugin run from the command line; in Xcode, click **Trust & Enable** the first time you build.
 
 The app is written to `build/DerivedData/Build/Products/Release/WrangURL.app`. Debug and local builds are ad-hoc signed, so they run on your own Mac without a certificate.
 
 When you set a development build as your default browser, macOS records the path of that particular copy. After moving or deleting it, set the default browser again.
 
 ### Releasing
+
+Publishing a GitHub release runs `.github/workflows/release.yml`. It builds the app, re-signs it with a self-signed certificate (`scripts/resign.sh`) so every release has the same code signing identity, and attaches it to the release as a zip, along with the Sparkle `appcast.xml` that installed copies check for updates. The release notes become the update notes. The workflow needs the `SPARKLE_PRIVATE_KEY` repository secret. That's the EdDSA private key whose public half is `SUPublicEDKey` in `project.yml`. Export it with Sparkle's `generate_keys --account wrangurl -x <file>`. It also needs `SIGNING_CERTIFICATE_P12` (the base64-encoded "WrangURL Self-Signed" identity, exported from Keychain Access as a .p12) and `SIGNING_CERTIFICATE_PASSWORD`. The build number is the workflow run number, so each release is newer than the one before it.
 
 `scripts/release.sh` builds a signed, notarized app and DMG in `build/release/`. It needs:
 
@@ -111,7 +119,7 @@ Set `SKIP_NOTARIZE=1` to build and sign without notarizing. There are more detai
 Run the tests from Xcode with **⌘U**, or from the command line:
 
 ```sh
-xcodebuild -project WrangURL.xcodeproj -scheme WrangURL -derivedDataPath build/DerivedData test
+xcodebuild -project WrangURL.xcodeproj -scheme WrangURL -derivedDataPath build/DerivedData -skipPackagePluginValidation test
 ```
 
 The tests use Swift Testing. They cover:

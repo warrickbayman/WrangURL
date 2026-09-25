@@ -6,6 +6,7 @@ struct MenuBarView: View {
     @Environment(URLRouter.self) private var router
     @Environment(DefaultBrowserManager.self) private var defaultBrowser
     @Environment(LoginItemManager.self) private var loginItem
+    @Environment(UpdateManager.self) private var updates
     @Environment(SettingsWindowController.self) private var settingsWindow
 
     var body: some View {
@@ -63,6 +64,10 @@ struct MenuBarView: View {
             get: { loginItem.isEnabled },
             set: { loginItem.setEnabled($0) }
         ))
+
+        Button("Check for Updates…") { updates.checkForUpdates() }
+            .disabled(!updates.canCheckForUpdates)
+        Button("WrangURL Help") { WrangURLHelp.open() }
 
         Divider()
 

@@ -105,6 +105,7 @@ private struct FallbackStep: View {
         VStack(alignment: .leading, spacing: 0) {
             StepHeader(
                 title: "Welcome to WrangURL",
+                // swiftlint:disable:next line_length
                 message: "WrangURL sends each link you open to the right browser, based on rules you set. First, choose the browser for links that no rule covers."
             )
             ScrollView {
@@ -236,6 +237,7 @@ private struct DefaultBrowserStep: View {
             StepHeader(
                 symbol: "link",
                 title: "Make WrangURL your default browser",
+                // swiftlint:disable:next line_length
                 message: "To route links from other apps, WrangURL has to be the default browser. It passes each link on to the browser your rules choose. macOS will ask you to confirm."
             )
             if defaultBrowser.isDefault {

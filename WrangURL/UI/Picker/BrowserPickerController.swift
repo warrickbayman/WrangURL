@@ -55,7 +55,11 @@ final class BrowserPickerController {
 
     private func handle(_ event: NSEvent) -> Bool {
         guard let model,
-              let action = PickerAction(keyCode: event.keyCode, characters: event.charactersIgnoringModifiers, modifiers: event.modifierFlags)
+              let action = PickerAction(
+                  keyCode: event.keyCode,
+                  characters: event.charactersIgnoringModifiers,
+                  modifiers: event.modifierFlags
+              )
         else { return false }
 
         switch action {

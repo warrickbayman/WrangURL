@@ -48,7 +48,11 @@ struct HistoryView: View {
             ForEach(days) { day in
                 Section {
                     ForEach(day.entries) { entry in
-                        HistoryRow(entry: entry)
+                        HistoryRow(entry: entry) {
+                            open([entry.id])
+                        } onCopy: {
+                            copy([entry.id])
+                        }
                     }
                 } header: {
                     Text(title(for: day.date))
@@ -111,9 +115,11 @@ struct HistoryView: View {
     }
 }
 
-/// One opened link: time, URL and the browser it went to.
+/// One opened link: time, URL and the browser it went to, with buttons to open or copy it.
 private struct HistoryRow: View {
     let entry: HistoryEntry
+    let onOpen: () -> Void
+    let onCopy: () -> Void
 
     var body: some View {
         HStack {
@@ -133,6 +139,13 @@ private struct HistoryRow: View {
             }
             BrowserIcon(id: entry.browserID, size: 16)
             Text(entry.browserName)
+            Button("Copy Link", systemImage: "doc.on.doc", action: onCopy)
+                .help("Copy Link")
+            Button("Open Link", systemImage: "arrow.up.forward.square", action: onOpen)
+                .help("Open Link Again")
         }
+        .buttonStyle(.borderless)
+        .labelStyle(.iconOnly)
+        .padding(4)
     }
 }

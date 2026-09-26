@@ -87,10 +87,9 @@ struct GeneralSettingsView: View {
 
             Section {
                 Toggle("Include URLs in logs", isOn: logsURLs)
-                LabeledContent {
+                Toggle("Keep a history of opened links", isOn: keepsHistory)
+                LabeledContent("History") {
                     Button("Show History…") { historyWindow.show() }
-                } label: {
-                    Toggle("Keep a history of opened links", isOn: keepsHistory)
                 }
             } header: {
                 Text("Privacy")

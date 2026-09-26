@@ -5,11 +5,14 @@
 
 WrangURL is a macOS menu bar app that opens each link in the right browser. You write rules that match URLs, and WrangURL sends matching links to the browser you choose. If a rule lists more than one browser, a picker lets you choose each time.
 
-> **FULL DISCLOSURE**  
-> I am not a Swift developer and wanted a quick solution to this. I found a fiew open source solutions, but really just wanted to experiment with this idea.  
-> **WrangURL is built using Claude Code. Details can be found in `PLAN.md` and `CLAUDE.md`**
+**If you use WrangURL, please consider [sponsoring](https://github.com/sponsors/warrickbayman). It really does help.**
 
-**If you like this, please consider [sponsoring](https://github.com/sponsors/warrickbayman). It really does help.**
+> [!IMPORTANT]
+> I am not a Swift developer, but I've always wanted to try. I found a few open source solutions to link wrangling, but figured this would be a good way to learn. I have not written every line and Claude has made the process easier. But I use this tool daily, so I'm comitted to maintaining it either way. The more I learn the less relient I'll become on AI.
+>
+> **HOW I USE AI CURRENTLY**: I'll generally ask Claude to plan changes, and then get it to guide me through the work, explaining as it goes.
+>
+> **WrangURL is built using Claude. Details can be found in `PLAN.md` and `CLAUDE.md`**
 
 <p align="center">
   <img src="docs/picker.png" alt="The WrangURL browser picker showing Safari, Google Chrome, Brave Browser and Zen for a localhost link" width="390">

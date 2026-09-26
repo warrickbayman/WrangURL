@@ -4,12 +4,14 @@ import SwiftUI
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let config: ConfigStore
+    let history: HistoryStore
     let browsers: BrowserRegistry
     let router: URLRouter
     let defaultBrowser: DefaultBrowserManager
     let loginItem = LoginItemManager()
     let updates = UpdateManager(startingUpdater: !AppDelegate.isRunningTests)
     let settingsWindow = SettingsWindowController()
+    let historyWindow = HistoryWindowController()
     let onboardingWindow = OnboardingWindowController()
 
     /// The app hosts the unit tests; skip startup side effects so tests don't
@@ -18,8 +20,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     override init() {
         config = ConfigStore()
+        history = HistoryStore()
         browsers = BrowserRegistry()
-        router = URLRouter(config: config, browsers: browsers)
+        router = URLRouter(config: config, browsers: browsers, history: history)
         defaultBrowser = DefaultBrowserManager(config: config)
         super.init()
 
@@ -33,6 +36,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             browsers.refresh()
             defaultBrowser.refresh()
             loginItem.refresh()
+        }
+
+        historyWindow.makeContent = { [unowned self] in AnyView(HistoryView().appEnvironment(self))
         }
 
         onboardingWindow.makeContent = { [unowned self] step, finish in
@@ -63,6 +69,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let name = UserDefaults.standard.string(forKey: "DebugSettingsTab"),
            let tab = SettingsTab.allCases.first(where: { $0.title.lowercased() == name }) {
             settingsWindow.show(tab: tab)
+        }
+        // Launch with `-DebugShowHistory YES` to open the History window.
+        if UserDefaults.standard.bool(forKey: "DebugShowHistory") {
+            historyWindow.show()
         }
         if let step = Self.debugOnboardingStep {
             onboardingWindow.show(step: step)

@@ -44,8 +44,9 @@ The router then either opens the URL via `NSWorkspace` or shows `BrowserPickerCo
 - `URLRouter`
 - `DefaultBrowserManager`
 - `LoginItemManager`
+- `HistoryStore` (opened links, saved to `history.json` next to `config.json`)
 - `UpdateManager` (wraps Sparkle; its updater isn't started when hosting tests)
-- the two window controllers
+- the three window controllers (Settings, Onboarding, History)
 
 They reach SwiftUI through `View.appEnvironment(_:)` in `WrangURLApp.swift`, so a new shared object must be added there. `ConfigStore` is the single source of truth. Mutate it only via `update { }`, which writes `config.json` straight away.
 
@@ -76,6 +77,7 @@ Debug builds accept launch arguments for inspecting UI without clicking. For exa
 - `-DebugEditRule <index>` opens the rule editor.
 - `-DebugInsertionIndex <n>` draws the rule editor's drop line at that position.
 - `-DebugOnboardingStep 0-3` opens the setup assistant on that step.
+- `-DebugShowHistory YES` opens the History window.
 - `-DebugShowPicker <bundleIDs,…>` (plus optional `-DebugPickerURL <url>`) shows the picker. `docs/picker.png` was captured this way.
 
 `docs/` is also the GitHub Pages site (`index.html`, `style.css`, `site.js`, no build step). Its screenshots in `docs/images/` were captured this way in light (`-NSRequiresAquaSystemAppearance YES`) and dark variants, using a demo `config.json`.

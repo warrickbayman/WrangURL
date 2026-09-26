@@ -8,6 +8,7 @@ struct MenuBarView: View {
     @Environment(LoginItemManager.self) private var loginItem
     @Environment(UpdateManager.self) private var updates
     @Environment(SettingsWindowController.self) private var settingsWindow
+    @Environment(HistoryWindowController.self) private var historyWindow
 
     var body: some View {
         if let version = updates.pendingUpdateVersion {
@@ -58,6 +59,8 @@ struct MenuBarView: View {
                 }
             }
         }
+
+        Button("History…") { historyWindow.show() }
 
         Divider()
 

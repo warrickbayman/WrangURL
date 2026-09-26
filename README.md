@@ -18,6 +18,7 @@ WrangURL is a macOS menu bar app that opens each link in the right browser. You 
 - Match URLs with simple patterns like `localhost`, `*.example.com` or `github.com/myorg/*`, or with regular expressions.
 - Send a match straight to one browser, or choose from a picker when a rule lists several.
 - Choose what happens to links no rule matches: open them in a fallback browser, or show the picker.
+- Keeps a searchable history of the links it has opened, grouped by day.
 - Runs in the menu bar and can open at login.
 
 Requires macOS 14 or later.
@@ -67,9 +68,15 @@ The picker appears next to the mouse pointer. The app you clicked the link in st
 | `⌘C` | Copy the link and close the picker |
 | `Esc` or click elsewhere | Cancel |
 
+### History
+
+Choose **History…** in the menu to see every link WrangURL has opened, grouped by day, with the time, the rule that matched and the browser it went to. Search filters by URL, browser or rule. Double-click a link to open it again through your rules, or right-click to copy or delete links. **Clear History…** in the toolbar removes everything.
+
+History is kept only on this Mac, in `history.json` next to the configuration file, and holds the most recent 5,000 links. Turn it off in **Settings → General**.
+
 ### Settings and configuration
 
-- **Settings → General** covers the fallback browser, what to do with unmatched links, launch at login, updates, whether URLs appear in the system log, and the default browser status.
+- **Settings → General** covers the fallback browser, what to do with unmatched links, launch at login, updates, whether URLs appear in the system log, whether to keep a history, and the default browser status.
 - WrangURL checks GitHub for new releases with [Sparkle](https://sparkle-project.org). Choose **Check for Updates…** in the menu to check now.
 - If WrangURL stops being the default browser, the menu bar icon changes to ⚠︎.
 - **Import… and Export…** save and load your rules and settings as JSON.

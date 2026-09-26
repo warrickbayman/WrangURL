@@ -54,6 +54,8 @@ extension View {
             .environment(app.loginItem)
             .environment(app.updates)
             .environment(app.settingsWindow)
+            .environment(app.historyWindow)
             .environment(app.onboardingWindow)
+            .environment(app.history)
     }
 }

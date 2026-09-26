@@ -8,6 +8,7 @@ struct GeneralSettingsView: View {
     @Environment(LoginItemManager.self) private var loginItem
     @Environment(UpdateManager.self) private var updates
     @Environment(OnboardingWindowController.self) private var onboarding
+    @Environment(HistoryWindowController.self) private var historyWindow
 
     var body: some View {
         Form {
@@ -86,10 +87,15 @@ struct GeneralSettingsView: View {
 
             Section {
                 Toggle("Include URLs in logs", isOn: logsURLs)
+                LabeledContent {
+                    Button("Show History…") { historyWindow.show() }
+                } label: {
+                    Toggle("Keep a history of opened links", isOn: keepsHistory)
+                }
             } header: {
                 Text("Privacy")
             } footer: {
-                Text("Logged links help when troubleshooting rules. Turn this off to keep URLs out of the system log.")
+                Text("Logged links help troubleshoot rules. History stays on this Mac; turning it off keeps existing entries.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -139,6 +145,13 @@ struct GeneralSettingsView: View {
         Binding(
             get: { config.config.settings.logsURLs },
             set: { enabled in config.update { $0.settings.logsURLs = enabled } }
+        )
+    }
+
+    private var keepsHistory: Binding<Bool> {
+        Binding(
+            get: { config.config.settings.keepsHistory },
+            set: { enabled in config.update { $0.settings.keepsHistory = enabled } }
         )
     }
 

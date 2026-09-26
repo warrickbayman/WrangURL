@@ -18,6 +18,7 @@ final class URLRouter {
 
     @ObservationIgnored private let config: ConfigStore
     @ObservationIgnored private let browsers: BrowserRegistry
+    @ObservationIgnored private let history: HistoryStore
     @ObservationIgnored private let picker = BrowserPickerController()
     @ObservationIgnored private var pending: [URL] = []
     @ObservationIgnored private var isReady = false
@@ -26,9 +27,10 @@ final class URLRouter {
     private static let recentLimit = 10
     private static let logger = Logger(subsystem: "com.thepublicgood.wrangurl", category: "router")
 
-    init(config: ConfigStore, browsers: BrowserRegistry) {
+    init(config: ConfigStore, browsers: BrowserRegistry, history: HistoryStore) {
         self.config = config
         self.browsers = browsers
+        self.history = history
     }
 
     func markReady() {
@@ -134,6 +136,9 @@ final class URLRouter {
         recent.insert(Entry(url: url, date: .now, targetName: name, ruleName: rule?.displayName), at: 0)
         if recent.count > Self.recentLimit {
             recent.removeLast(recent.count - Self.recentLimit)
+        }
+        if config.config.settings.keepsHistory {
+            history.record(HistoryEntry(url: url, date: .now, browserID: browserID, browserName: name, ruleName: rule?.displayName))
         }
     }
 }

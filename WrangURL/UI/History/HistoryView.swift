@@ -130,7 +130,8 @@ private struct HistoryRow: View {
                 .lineLimit(1)
                 .truncationMode(.middle)
                 .help(entry.url.absoluteString)
-            Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.trailing, 16)
             if let rule = entry.ruleName {
                 Text(rule)
                     .font(.caption)

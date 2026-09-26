@@ -94,7 +94,7 @@
     </div>
     <div>
       <h2>Stays out of the way</h2>
-      <p>Lives in the menu bar, can open at login, and updates itself from GitHub releases.</p>
+      <p>Lives in the menu bar, keeps a searchable history of the links it opened, and updates itself from GitHub releases.</p>
     </div>
   </section>
 
@@ -316,26 +316,52 @@
       </div>
     </div>
 
+    <h3 id="history">Look back at your history</h3>
+    <p>
+      Choose <b>History…</b> from the menu bar icon to see every link WrangURL has opened, grouped by day.
+      Each row shows the time, the link, the rule that matched it and the browser it went to.
+    </p>
+
+    <figure class="wide">
+      <picture>
+        <source srcset="images/history-dark.png" media="(prefers-color-scheme: dark)">
+        <img src="images/history-light.png" width="768" height="620" loading="lazy"
+             alt="The History window: links grouped under Today, Yesterday and an earlier date, each with its time, matching rule, browser, and buttons to copy or open it.">
+      </picture>
+      <figcaption>The History window. Rule names appear next to the browser when a rule matched.</figcaption>
+    </figure>
+
+    <ul>
+      <li>Type in <b>Search History</b> to filter by link, browser or rule.</li>
+      <li>Use the buttons at the end of a row to copy the link, or to open it again through your rules. Double-clicking a row also opens it again.</li>
+      <li>Right-click to open, copy or delete the selected links. Hold <kbd>⌘</kbd> or <kbd>Shift</kbd> to select several.</li>
+      <li>Click the trash button in the toolbar to clear the whole history.</li>
+    </ul>
+    <p>
+      History stays on your Mac, in <code>history.json</code> next to your configuration, and keeps the most recent 5,000 links.
+      To stop recording, turn off <b>Keep a history of opened links</b> in Settings → General.
+    </p>
+
     <h3 id="settings">Menu bar and settings</h3>
     <p>The menu bar icon gives you quick access to the things you change most:</p>
     <ul>
       <li>whether WrangURL is the default browser, with a button to set it again;</li>
       <li>the fallback browser, and what happens when no rule matches;</li>
       <li><b>Recent Links</b>. Choose one to copy it;</li>
-      <li><b>Edit Rules…</b>, <b>Settings…</b>, <b>Open at Login</b> and <b>Check for Updates…</b>.</li>
+      <li><b>History…</b>, <b>Edit Rules…</b>, <b>Settings…</b>, <b>Open at Login</b> and <b>Check for Updates…</b>.</li>
     </ul>
 
     <figure class="wide">
       <picture>
         <source srcset="images/settings-general-dark.png" media="(prefers-color-scheme: dark)">
         <img src="images/settings-general-light.png" width="748" height="736" loading="lazy"
-             alt="The General tab: default browser status, fallback browser, unmatched links, startup, updates, privacy and configuration.">
+             alt="The General tab: default browser status, fallback browser, unmatched links, startup, updates, and privacy options for logging URLs and keeping a history.">
       </picture>
       <figcaption>Settings → General.</figcaption>
     </figure>
 
     <p>
-      <b>Settings → General</b> covers the same routing options, plus launch at login, automatic updates, whether URLs are logged, and your configuration.
+      <b>Settings → General</b> covers the same routing options, plus launch at login, automatic updates, whether URLs are logged, whether to keep a history, and your configuration.
       Use <b>Import…</b> and <b>Export…</b> to move your rules and settings between Macs as a JSON file.
     </p>
     <p>

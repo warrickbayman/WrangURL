@@ -1,0 +1,126 @@
+[
+  {
+    "id": "84F33950-62DC-4AB9-992B-A092FCAB56D3",
+    "url": "http://localhost:3000/dashboard",
+    "date": "2026-09-28T08:42:00Z",
+    "browserID": "com.google.Chrome",
+    "browserName": "Google Chrome",
+    "ruleName": "Local development",
+    "sourceApp": {
+      "id": "com.apple.Notes",
+      "name": "Notes"
+    }
+  },
+  {
+    "id": "9A758AA9-DC0A-4D0E-A0E2-260F33B408E0",
+    "url": "https://myteam.atlassian.net/browse/WEB-214",
+    "date": "2026-09-28T08:15:00Z",
+    "browserID": "com.google.Chrome",
+    "browserName": "Google Chrome",
+    "ruleName": "Work docs",
+    "sourceApp": {
+      "id": "com.tinyspeck.slackmacgap",
+      "name": "Slack"
+    }
+  },
+  {
+    "id": "DC3F1DE0-CB78-40FE-993C-AD46A983D868",
+    "url": "https://meet.google.com/abc-defg-hij",
+    "date": "2026-09-28T07:58:00Z",
+    "browserID": "com.apple.Safari",
+    "browserName": "Safari",
+    "ruleName": "Video calls",
+    "sourceApp": {
+      "id": "com.apple.iCal",
+      "name": "Calendar"
+    }
+  },
+  {
+    "id": "788260F0-65F6-4DB9-999C-AC01D93EFBD3",
+    "url": "https://developer.apple.com/documentation/swiftui/list",
+    "date": "2026-09-28T07:31:00Z",
+    "browserID": "app.zen-browser.zen",
+    "browserName": "Zen",
+    "sourceApp": {
+      "id": "com.apple.mail",
+      "name": "Mail"
+    }
+  },
+  {
+    "id": "F826DC41-0328-4A27-9A1B-64BAC6398191",
+    "url": "https://www.bbc.com/news/technology",
+    "date": "2026-09-28T06:47:00Z",
+    "browserID": "com.apple.Safari",
+    "browserName": "Safari",
+    "ruleName": "Links from Messages",
+    "sourceApp": {
+      "id": "com.apple.MobileSMS",
+      "name": "Messages"
+    }
+  },
+  {
+    "id": "BA9D19CD-D26E-4C2A-8E38-0B68A139E74C",
+    "url": "https://github.com/myorg/website/pull/42",
+    "date": "2026-09-27T15:12:00Z",
+    "browserID": "com.brave.Browser",
+    "browserName": "Brave Browser",
+    "ruleName": "Company GitHub",
+    "sourceApp": {
+      "id": "com.tinyspeck.slackmacgap",
+      "name": "Slack"
+    }
+  },
+  {
+    "id": "30030BEF-0342-41F6-9880-2EB02A32B455",
+    "url": "http://localhost:5173/settings",
+    "date": "2026-09-27T13:03:00Z",
+    "browserID": "com.brave.Browser",
+    "browserName": "Brave Browser",
+    "ruleName": "Local development"
+  },
+  {
+    "id": "91B82C66-4393-4AC3-92B6-FCFCD913C416",
+    "url": "https://www.swift.org/documentation/",
+    "date": "2026-09-27T09:26:00Z",
+    "browserID": "app.zen-browser.zen",
+    "browserName": "Zen",
+    "sourceApp": {
+      "id": "com.apple.Notes",
+      "name": "Notes"
+    }
+  },
+  {
+    "id": "FE7CBF27-85D2-4200-A00B-7DE0C0D1A16D",
+    "url": "https://myteam.atlassian.net/wiki/spaces/ENG",
+    "date": "2026-09-27T07:05:00Z",
+    "browserID": "com.google.Chrome",
+    "browserName": "Google Chrome",
+    "ruleName": "Work docs",
+    "sourceApp": {
+      "id": "com.apple.mail",
+      "name": "Mail"
+    }
+  },
+  {
+    "id": "A4A6F657-B100-4154-8A18-EDD5977C092E",
+    "url": "https://en.wikipedia.org/wiki/Lasso",
+    "date": "2026-09-23T12:40:00Z",
+    "browserID": "app.zen-browser.zen",
+    "browserName": "Zen",
+    "sourceApp": {
+      "id": "com.apple.MobileSMS",
+      "name": "Messages"
+    }
+  },
+  {
+    "id": "753DAD56-76B3-472E-871B-44FE72B8C555",
+    "url": "https://www.apple.com/macos/",
+    "date": "2026-09-23T11:18:00Z",
+    "browserID": "app.zen-browser.zen",
+    "browserName": "Zen",
+    "sourceApp": {
+      "id": "com.apple.mail",
+      "name": "Mail"
+    }
+  }
+]

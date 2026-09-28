@@ -156,12 +156,25 @@ private struct RuleRow: View {
                         .fontWeight(.medium)
                 }
                 HStack(spacing: 6) {
-                    Text(rule.pattern)
-                        .font(hasName ? .callout.monospaced() : .body.monospaced())
-                        .foregroundStyle(hasName ? .secondary : .primary)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                    if rule.kind == .regex {
+                    if rule.matchesAnyURL {
+                        Text("Any link from \(rule.sourceAppNames)")
+                            .font(hasName ? .callout : .body)
+                            .foregroundStyle(hasName ? .secondary : .primary)
+                            .lineLimit(1)
+                    } else {
+                        Text(rule.pattern)
+                            .font(hasName ? .callout.monospaced() : .body.monospaced())
+                            .foregroundStyle(hasName ? .secondary : .primary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        if !rule.sourceApps.isEmpty {
+                            Text("from \(rule.sourceAppNames)")
+                                .font(.callout)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                    if rule.kind == .regex && !rule.matchesAnyURL {
                         Text("REGEX")
                             .font(.caption2.weight(.semibold))
                             .foregroundStyle(.secondary)
@@ -173,7 +186,7 @@ private struct RuleRow: View {
 
             Spacer()
 
-            if let error = RuleMatcher.validate(rule.pattern, kind: rule.kind) {
+            if let error = RuleMatcher.validate(rule) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.yellow)
                     .help(error.localizedDescription)
@@ -197,12 +210,26 @@ private struct URLTesterView: View {
     @Environment(ConfigStore.self) private var config
 
     @State private var input = ""
+    @State private var source: SourceApp?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            TextField("Test a URL", text: $input, prompt: Text("Test a URL, e.g. http://localhost:3000"))
-                .textFieldStyle(.roundedBorder)
-                .font(.body.monospaced())
+            HStack {
+                TextField("Test a URL", text: $input, prompt: Text("Test a URL, e.g. http://localhost:3000"))
+                    .textFieldStyle(.roundedBorder)
+                    .font(.body.monospaced())
+                if !ruleSourceApps.isEmpty {
+                    Picker("Clicked In", selection: $source) {
+                        Text("Any Other App").tag(SourceApp?.none)
+                        Divider()
+                        ForEach(ruleSourceApps, id: \.id) { app in
+                            Text(app.name).tag(Optional(app))
+                        }
+                    }
+                    .fixedSize()
+                    .help("The app the link is clicked in")
+                }
+            }
             Text(result)
                 .font(.callout)
                 .foregroundStyle(.secondary)
@@ -214,8 +241,14 @@ private struct URLTesterView: View {
         _ = config.config // Re-evaluate when rules or settings change.
         guard !input.isEmpty else { return " " }
         guard let url = URL(userInput: input) else { return "Not a valid URL" }
-        let (rule, decision) = router.preview(url)
+        let (rule, decision) = router.preview(url, from: source)
         let match = rule.map { "Matches “\($0.displayName)”." } ?? "No rule matches."
         return "\(match) \(browsers.describe(decision))."
+    }
+
+    /// Every app a rule is limited to, in rule order.
+    private var ruleSourceApps: [SourceApp] {
+        var seen = Set<String>()
+        return config.config.rules.flatMap(\.sourceApps).filter { seen.insert($0.id).inserted }
     }
 }

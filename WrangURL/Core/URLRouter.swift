@@ -20,7 +20,7 @@ final class URLRouter {
     @ObservationIgnored private let browsers: BrowserRegistry
     @ObservationIgnored private let history: HistoryStore
     @ObservationIgnored private let picker = BrowserPickerController()
-    @ObservationIgnored private var pending: [URL] = []
+    @ObservationIgnored private var pending: [(url: URL, source: SourceApp?)] = []
     @ObservationIgnored private var isReady = false
     @ObservationIgnored private var matcherCache: (rules: [Rule], matcher: RuleMatcher)?
 
@@ -37,16 +37,21 @@ final class URLRouter {
         isReady = true
         let queued = pending
         pending.removeAll()
-        handle(queued)
+        for (url, source) in queued {
+            route(url, from: source)
+        }
     }
 
-    func handle(_ urls: [URL]) {
+    /// Routes URLs clicked in `source`, the app they came from, if known.
+    func handle(_ urls: [URL], from source: SourceApp? = nil) {
         guard isReady else {
-            pending.append(contentsOf: urls)
+            pending.append(contentsOf: urls.map { ($0, source) })
             Self.logger.info("Queued \(urls.count) URL(s) until launch finishes")
             return
         }
-        urls.forEach(route)
+        for url in urls {
+            route(url, from: source)
+        }
     }
 
     var planner: RoutePlanner {
@@ -70,9 +75,9 @@ final class URLRouter {
         return matcher
     }
 
-    /// What would happen to a URL, without opening it. Used by the URL tester.
-    func preview(_ url: URL) -> (rule: Rule?, decision: RouteDecision) {
-        let rule = matcher.match(url)
+    /// What would happen to a URL clicked in `source`, without opening it. Used by the URL tester.
+    func preview(_ url: URL, from source: SourceApp? = nil) -> (rule: Rule?, decision: RouteDecision) {
+        let rule = matcher.match(url, from: source?.id)
         return (rule, planner.decide(for: url, matchedRule: rule))
     }
 
@@ -81,25 +86,25 @@ final class URLRouter {
         config.config.settings.logsURLs ? url.absoluteString : "<URL hidden>"
     }
 
-    private func route(_ url: URL) {
-        let (rule, decision) = preview(url)
-        Self.logger.info("Received \(self.loggable(url), privacy: .public); rule: \(rule?.displayName ?? "none", privacy: .public); decision: \(String(describing: decision), privacy: .public)")
+    private func route(_ url: URL, from source: SourceApp?) {
+        let (rule, decision) = preview(url, from: source)
+        Self.logger.info("Received \(self.loggable(url), privacy: .public) from \(source?.id ?? "unknown app", privacy: .public); rule: \(rule?.displayName ?? "none", privacy: .public); decision: \(String(describing: decision), privacy: .public)")
 
         switch decision {
         case .open(let browserID):
-            open(url, inBrowserWithID: browserID, rule: rule)
+            open(url, inBrowserWithID: browserID, rule: rule, source: source)
         case .pick(let browserIDs):
-            presentPicker(for: url, browserIDs: browserIDs, rule: rule)
+            presentPicker(for: url, browserIDs: browserIDs, rule: rule, source: source)
         case .noBrowserAvailable:
             Self.logger.error("No browser available for \(self.loggable(url), privacy: .public)")
         }
     }
 
-    private func presentPicker(for url: URL, browserIDs: [String], rule: Rule?) {
+    private func presentPicker(for url: URL, browserIDs: [String], rule: Rule?, source: SourceApp?) {
         let choices = browserIDs.compactMap(browsers.resolve)
         guard choices.count > 1 else {
             if let only = choices.first {
-                open(url, inBrowserWithID: only.id, rule: rule)
+                open(url, inBrowserWithID: only.id, rule: rule, source: source)
             }
             return
         }
@@ -109,11 +114,11 @@ final class URLRouter {
                 Self.logger.info("Picker cancelled for \(self.loggable(url), privacy: .public)")
                 return
             }
-            self.open(url, inBrowserWithID: browser.id, rule: rule)
+            self.open(url, inBrowserWithID: browser.id, rule: rule, source: source)
         }
     }
 
-    private func open(_ url: URL, inBrowserWithID browserID: String, rule: Rule?) {
+    private func open(_ url: URL, inBrowserWithID browserID: String, rule: Rule?, source: SourceApp?) {
         guard let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: browserID) else {
             Self.logger.error("Browser \(browserID, privacy: .public) is not installed")
             return
@@ -138,7 +143,10 @@ final class URLRouter {
             recent.removeLast(recent.count - Self.recentLimit)
         }
         if config.config.settings.keepsHistory {
-            history.record(HistoryEntry(url: url, date: .now, browserID: browserID, browserName: name, ruleName: rule?.displayName))
+            history.record(HistoryEntry(
+                url: url, date: .now, browserID: browserID, browserName: name,
+                ruleName: rule?.displayName, sourceApp: source
+            ))
         }
     }
 }

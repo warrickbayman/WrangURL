@@ -33,6 +33,27 @@ struct HistoryStoreTests {
         #expect(HistoryStore(fileURL: fileURL).entries.map(\.ruleName) == [nil, "Work"])
     }
 
+    @Test func keepsSourceApp() {
+        let store = HistoryStore(fileURL: fileURL)
+        let slack = SourceApp(id: "com.tinyspeck.slackmacgap", name: "Slack")
+        store.record(entry("https://a.example", sourceApp: slack))
+
+        #expect(HistoryStore(fileURL: fileURL).entries.map(\.sourceApp) == [slack])
+    }
+
+    @Test func loadsEntriesSavedBeforeSourceApps() throws {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let json = """
+        [{"id": "\(UUID().uuidString)", "url": "https://a.example", "date": "2026-09-21T10:00:00Z",
+          "browserID": "com.apple.Safari", "browserName": "Safari"}]
+        """
+        try Data(json.utf8).write(to: fileURL)
+
+        let entries = HistoryStore.load(from: fileURL)
+        #expect(entries.count == 1)
+        #expect(entries.first?.sourceApp == nil)
+    }
+
     @Test func trimsToLimit() {
         let store = HistoryStore(fileURL: fileURL, limit: 3)
         for index in 1...5 {
@@ -73,13 +94,14 @@ struct HistoryStoreTests {
 
     /// Dates are whole seconds, because ISO 8601 in JSON drops fractions and the
     /// reloaded entries wouldn't compare equal otherwise.
-    private func entry(_ url: String, ruleName: String? = nil) -> HistoryEntry {
+    private func entry(_ url: String, ruleName: String? = nil, sourceApp: SourceApp? = nil) -> HistoryEntry {
         HistoryEntry(
             url: URL(string: url)!,
             date: Date(timeIntervalSince1970: 1_790_000_000),
             browserID: "com.apple.Safari",
             browserName: "Safari",
-            ruleName: ruleName
+            ruleName: ruleName,
+            sourceApp: sourceApp
         )
     }
 }
@@ -129,7 +151,8 @@ struct HistoryGroupingTests {
 
 struct HistorySearchTests {
     private let entries = [
-        HistoryEntry(url: URL(string: "https://github.com/org/repo")!, date: .now, browserID: "com.google.Chrome", browserName: "Google Chrome", ruleName: "Work"),
+        HistoryEntry(url: URL(string: "https://github.com/org/repo")!, date: .now, browserID: "com.google.Chrome", browserName: "Google Chrome", ruleName: "Work",
+                     sourceApp: SourceApp(id: "com.tinyspeck.slackmacgap", name: "Slack")),
         HistoryEntry(url: URL(string: "http://localhost:3000")!, date: .now, browserID: "org.mozilla.firefox", browserName: "Firefox", ruleName: nil),
     ]
 
@@ -144,8 +167,9 @@ struct HistorySearchTests {
         ("work", "github.com"),
         ("3000", "localhost"),
         ("firefox", "localhost"),
+        ("SLACK", "github.com"),
     ])
-    func matchesURLBrowserOrRuleIgnoringCase(query: String, host: String) {
+    func matchesURLBrowserRuleOrSourceIgnoringCase(query: String, host: String) {
         #expect(entries.matching(query).map(\.url.host) == [host])
     }
 

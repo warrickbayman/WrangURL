@@ -15,12 +15,30 @@ struct Rule: Codable, Identifiable, Hashable, Sendable {
     /// Bundle identifiers, in the order they appear in the picker.
     var browserIDs: [String]
     var isEnabled = true
+    /// Apps the link must be clicked in. Empty matches links from any app, including unknown ones.
+    var sourceApps: [SourceApp] = []
 }
 
 extension Rule {
-    /// The name, or the pattern when no name was given.
+    /// The name, or the pattern when no name was given, or the source apps when there's no pattern either.
     var displayName: String {
-        name.trimmingCharacters(in: .whitespaces).isEmpty ? pattern : name
+        if !name.trimmingCharacters(in: .whitespaces).isEmpty {
+            return name
+        }
+        if matchesAnyURL {
+            return "Links from \(sourceAppNames)"
+        }
+        return pattern
+    }
+
+    /// A rule limited to source apps may leave the pattern empty to match every URL from them.
+    var matchesAnyURL: Bool {
+        !sourceApps.isEmpty && pattern.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// The source apps' names, e.g. "Slack or Mail".
+    var sourceAppNames: String {
+        sourceApps.map(\.name).formatted(.list(type: .or))
     }
 
     // Tolerate missing keys so older or hand-edited config files still load.
@@ -32,5 +50,6 @@ extension Rule {
         kind = try container.decodeIfPresent(Kind.self, forKey: .kind) ?? .simple
         browserIDs = try container.decodeIfPresent([String].self, forKey: .browserIDs) ?? []
         isEnabled = try container.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? true
+        sourceApps = try container.decodeIfPresent([SourceApp].self, forKey: .sourceApps) ?? []
     }
 }

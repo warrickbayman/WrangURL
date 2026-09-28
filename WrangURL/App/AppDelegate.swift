@@ -59,6 +59,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         guard !Self.isRunningTests else { return }
 
+        #if DEBUG
+        // Launch with `-DebugAppearance <light|dark>` to override the system appearance, e.g. for screenshots.
+        switch UserDefaults.standard.string(forKey: "DebugAppearance") {
+        case "light": NSApp.appearance = NSAppearance(named: .aqua)
+        case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
+        default: break
+        }
+        #endif
+
         defaultBrowser.captureFallbackIfNeeded()
         if !config.config.settings.hasCompletedOnboarding {
             onboardingWindow.show(step: Self.debugOnboardingStep ?? .fallback)
@@ -112,6 +121,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func application(_ application: NSApplication, open urls: [URL]) {
-        router.handle(urls)
+        router.handle(urls, from: SourceApp.forCurrentAppleEvent())
     }
 }

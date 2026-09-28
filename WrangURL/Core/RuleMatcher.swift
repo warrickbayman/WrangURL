@@ -14,18 +14,19 @@ enum PatternError: LocalizedError, Equatable {
     }
 }
 
-/// Finds the first enabled rule matching a URL. Rules are compiled once at init.
+/// Finds the first enabled rule matching a URL and the app it was clicked in. Rules are compiled once at init.
 struct RuleMatcher {
-    private let compiled: [(rule: Rule, regex: NSRegularExpression)]
+    /// A nil regex matches every URL (see `Rule.matchesAnyURL`).
+    private let compiled: [(rule: Rule, regex: NSRegularExpression?)]
     /// Enabled rules whose pattern failed to compile; these never match.
     let invalidRules: [UUID: PatternError]
 
     init(rules: [Rule]) {
-        var compiled: [(Rule, NSRegularExpression)] = []
+        var compiled: [(Rule, NSRegularExpression?)] = []
         var invalid: [UUID: PatternError] = [:]
         for rule in rules where rule.isEnabled {
             do {
-                compiled.append((rule, try Self.compile(rule.pattern, kind: rule.kind)))
+                compiled.append((rule, rule.matchesAnyURL ? nil : try Self.compile(rule.pattern, kind: rule.kind)))
             } catch {
                 invalid[rule.id] = error
             }
@@ -34,10 +35,20 @@ struct RuleMatcher {
         self.invalidRules = invalid
     }
 
-    func match(_ url: URL) -> Rule? {
+    /// `sourceID` is the bundle ID of the app the link was clicked in, if known. Rules limited
+    /// to source apps never match links from an unknown app.
+    func match(_ url: URL, from sourceID: String? = nil) -> Rule? {
         let string = url.absoluteString
         let range = NSRange(string.startIndex..., in: string)
-        return compiled.first { $0.regex.firstMatch(in: string, range: range) != nil }?.rule
+        return compiled.first { rule, regex in
+            guard rule.sourceApps.isEmpty || rule.sourceApps.contains(where: { $0.id == sourceID }) else { return false }
+            return regex.map { $0.firstMatch(in: string, range: range) != nil } ?? true
+        }?.rule
+    }
+
+    /// Like `validate(_:kind:)`, but allows an empty pattern when the rule has source apps.
+    static func validate(_ rule: Rule) -> PatternError? {
+        rule.matchesAnyURL ? nil : validate(rule.pattern, kind: rule.kind)
     }
 
     static func validate(_ pattern: String, kind: Rule.Kind) -> PatternError? {

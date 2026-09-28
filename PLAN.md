@@ -179,6 +179,7 @@ enum UnmatchedBehavior: String, Codable {
   - `-DebugEditRule <index>` opens the rule editor.
   - `-DebugInsertionIndex <n>` draws the browser drop line at that position.
   - `-DebugOnboardingStep <0-3>` opens the setup assistant on that step.
+  - `-DebugAppearance <light|dark>` overrides the system appearance, for screenshots.
   - `-DebugShowPicker <bundle IDs>` shows the picker with those browsers (comma-separated). `-DebugPickerURL <url>` sets the link it displays. Choosing a browser does nothing.
 - When the app is hosting the unit tests (`XCTestConfigurationFilePath` is set), it skips startup side effects: it doesn't record the fallback browser or open the setup assistant.
 - Setup is marked complete when its window closes by any means, so it doesn't reappear on every launch. Settings → General → Run Setup Again… reopens it.
@@ -191,6 +192,7 @@ enum UnmatchedBehavior: String, Codable {
 - **Import:** only accepts JSON with a `rules` or `settings` key, so an arbitrary file can't wipe the configuration. It offers Add Rules, which keeps your settings and gives duplicate IDs new ones, or Replace All, which keeps the "setup done" flag.
 - In zsh, `log` is a shell builtin, so use `/usr/bin/log stream --predicate 'subsystem == "com.thepublicgood.wrangurl"'` to view the app's logs.
 - Sparkle handles auto-updates (see the release workflow and `UpdateManager`).
+- **Source app:** read from the `keySenderPIDAttr` of the `GetURL` Apple Event inside `application(_:open:)`, the only time that event is available. Helper processes (Electron, WebKit) are mapped to their outermost `.app`. When the sender isn't an app (e.g. `open` in Terminal) the source is unknown. Falling back to the frontmost app was tried and dropped: it's often the browser the previous link went to. Rules limited to apps never match an unknown source.
 
 ## 11. Milestones
 
@@ -218,7 +220,6 @@ enum UnmatchedBehavior: String, Codable {
 ## 12. Future ideas
 
 - Hold ⌥ while clicking a link to force the picker.
-- Rules based on the source app (e.g. "links from Slack → Chrome"). The sender's process ID is available from the incoming Apple Event.
 - Browser profiles, such as Chrome or Edge profiles, launched with command-line arguments.
 - A "Remember this choice" option in the picker that creates a rule automatically.
 - Stripping tracking parameters (`utm_*`) before opening.

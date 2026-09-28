@@ -127,3 +127,74 @@ struct RuleMatcherTests {
         #expect(matcher.match(try #require(URL(string: "https://example.com"))) == nil)
     }
 }
+
+struct SourceAppRuleTests {
+    private let chrome = "com.google.Chrome"
+    private let slack = SourceApp(id: "com.tinyspeck.slackmacgap", name: "Slack")
+    private let mail = SourceApp(id: "com.apple.mail", name: "Mail")
+
+    @Test func ruleLimitedToAppsMatchesOnlyThoseApps() throws {
+        let rule = Rule(name: "Work", pattern: "github.com", kind: .simple, browserIDs: [chrome], sourceApps: [slack, mail])
+        let matcher = RuleMatcher(rules: [rule])
+        let url = try #require(URL(string: "https://github.com/org"))
+
+        #expect(matcher.match(url, from: slack.id) != nil)
+        #expect(matcher.match(url, from: mail.id) != nil)
+        #expect(matcher.match(url, from: "com.apple.finder") == nil)
+        #expect(matcher.match(url, from: nil) == nil)
+        #expect(matcher.match(try #require(URL(string: "https://example.com")), from: slack.id) == nil)
+    }
+
+    @Test func ruleWithoutAppsMatchesAnySource() throws {
+        let rule = Rule(name: "Any", pattern: "github.com", kind: .simple, browserIDs: [chrome])
+        let url = try #require(URL(string: "https://github.com"))
+
+        #expect(RuleMatcher(rules: [rule]).match(url, from: slack.id) != nil)
+        #expect(RuleMatcher(rules: [rule]).match(url, from: nil) != nil)
+    }
+
+    @Test func emptyPatternWithAppsMatchesEveryURLFromThem() throws {
+        let rule = Rule(name: "", pattern: " ", kind: .simple, browserIDs: [chrome], sourceApps: [slack])
+        let matcher = RuleMatcher(rules: [rule])
+
+        #expect(RuleMatcher.validate(rule) == nil)
+        #expect(matcher.invalidRules.isEmpty)
+        #expect(matcher.match(try #require(URL(string: "https://example.com/a?b")), from: slack.id) != nil)
+        #expect(matcher.match(try #require(URL(string: "https://example.com")), from: mail.id) == nil)
+    }
+
+    @Test func emptyPatternWithoutAppsIsInvalid() {
+        let rule = Rule(name: "", pattern: "", kind: .simple, browserIDs: [chrome])
+        #expect(RuleMatcher.validate(rule) == .empty)
+    }
+
+    @Test func appRuleOrderStillDecides() throws {
+        let rules = [
+            Rule(name: "Slack", pattern: "", kind: .simple, browserIDs: [chrome], sourceApps: [slack]),
+            Rule(name: "GitHub", pattern: "github.com", kind: .simple, browserIDs: ["com.apple.Safari"]),
+        ]
+        let matcher = RuleMatcher(rules: rules)
+        let url = try #require(URL(string: "https://github.com"))
+
+        #expect(matcher.match(url, from: slack.id)?.name == "Slack")
+        #expect(matcher.match(url, from: mail.id)?.name == "GitHub")
+    }
+
+    @Test func displayNameFallsBackToSourceApps() {
+        let rule = Rule(name: "", pattern: "", kind: .simple, browserIDs: [], sourceApps: [slack, mail])
+        #expect(rule.displayName == "Links from Slack or Mail")
+        #expect(Rule(name: "", pattern: "localhost", kind: .simple, browserIDs: [], sourceApps: [slack]).displayName == "localhost")
+    }
+
+    @Test func rulesSavedBeforeSourceAppsStillLoad() throws {
+        let json = #"{"name": "Old", "pattern": "localhost", "kind": "simple", "browserIDs": ["com.apple.Safari"]}"#
+        let rule = try JSONDecoder().decode(Rule.self, from: Data(json.utf8))
+        #expect(rule.sourceApps.isEmpty)
+    }
+
+    @Test func sourceAppsRoundTrip() throws {
+        let rule = Rule(name: "Work", pattern: "", kind: .simple, browserIDs: [chrome], sourceApps: [slack])
+        let decoded = try JSONDecoder().decode(Rule.self, from: JSONEncoder().encode(rule))
+        #expect(decoded == rule)
+    }
+}

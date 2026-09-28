@@ -1,0 +1,92 @@
+{
+  "rules": [
+    {
+      "id": "E4C477ED-9CA2-4C31-8A84-A8FEFC95F869",
+      "name": "Local development",
+      "pattern": "localhost",
+      "kind": "simple",
+      "browserIDs": [
+        "com.google.Chrome",
+        "com.brave.Browser"
+      ],
+      "isEnabled": true,
+      "sourceApps": []
+    },
+    {
+      "id": "25253F0D-0966-4DBB-AFE8-1616E2B925CA",
+      "name": "Work docs",
+      "pattern": "*.atlassian.net",
+      "kind": "simple",
+      "browserIDs": [
+        "com.google.Chrome"
+      ],
+      "isEnabled": true,
+      "sourceApps": [
+        {
+          "id": "com.tinyspeck.slackmacgap",
+          "name": "Slack"
+        },
+        {
+          "id": "com.apple.mail",
+          "name": "Mail"
+        }
+      ]
+    },
+    {
+      "id": "04B808F8-282D-495C-9537-25689C189D2F",
+      "name": "Company GitHub",
+      "pattern": "github.com/myorg/*",
+      "kind": "simple",
+      "browserIDs": [
+        "com.brave.Browser"
+      ],
+      "isEnabled": true,
+      "sourceApps": []
+    },
+    {
+      "id": "B7C2C868-26B6-408A-9089-E957250C5263",
+      "name": "Video calls",
+      "pattern": "(?i)^https://(meet\\.google|[a-z0-9-]+\\.zoom)\\.(com|us)/",
+      "kind": "regex",
+      "browserIDs": [
+        "com.apple.Safari",
+        "app.zen-browser.zen"
+      ],
+      "isEnabled": true,
+      "sourceApps": []
+    },
+    {
+      "id": "4B3998CE-9373-42D2-9C27-95371DAA87B2",
+      "name": "",
+      "pattern": "",
+      "kind": "simple",
+      "browserIDs": [
+        "com.apple.Safari"
+      ],
+      "isEnabled": true,
+      "sourceApps": [
+        {
+          "id": "com.apple.MobileSMS",
+          "name": "Messages"
+        }
+      ]
+    },
+    {
+      "id": "18AD8D67-5CD0-4F3A-8BC5-0B470F3EB0FE",
+      "name": "",
+      "pattern": "*.apple.com",
+      "kind": "simple",
+      "browserIDs": [
+        "com.apple.Safari"
+      ],
+      "isEnabled": false,
+      "sourceApps": []
+    }
+  ],
+  "settings": {
+    "fallbackBrowserID": "app.zen-browser.zen",
+    "hasCompletedOnboarding": true,
+    "unmatchedBehavior": "openFallback"
+  },
+  "version": 1
+}

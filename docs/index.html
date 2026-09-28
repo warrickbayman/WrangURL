@@ -250,7 +250,7 @@
         <picture>
           <source srcset="images/settings-rules-dark.png" media="(prefers-color-scheme: dark)">
           <img src="images/settings-rules-light.png" width="748" height="736" loading="lazy"
-               alt="The Rules tab listing five rules, each with its pattern and the icons of the browsers it opens.">
+               alt="The Rules tab listing six rules, each with its pattern, the apps it is limited to, and the icons of the browsers it opens.">
         </picture>
         <figcaption>The Rules tab. The icons show which browsers each rule opens.</figcaption>
       </figure>
@@ -258,9 +258,9 @@
         <picture>
           <source srcset="images/rule-editor-dark.png" media="(prefers-color-scheme: dark)">
           <img src="images/rule-editor-light.png" width="748" height="736" loading="lazy"
-               alt="The rule editor for Local development: a simple pattern of localhost that opens Google Chrome or Brave Browser.">
+               alt="The rule editor for Work docs: a simple pattern of *.atlassian.net, clicked in Slack or Mail, that opens Google Chrome.">
         </picture>
-        <figcaption>Editing a rule. With two browsers, this rule shows the picker.</figcaption>
+        <figcaption>Editing a rule. It only applies to links clicked in Slack or Mail.</figcaption>
       </figure>
     </div>
 
@@ -286,10 +286,18 @@
       <code>(?i)^https://meet\.google\.com/</code>.
     </p>
 
+    <h4>Limit a rule to apps</h4>
+    <p>
+      Add apps under <b>Clicked In</b> to make a rule apply only to links clicked in those apps, for example to send
+      links from Slack to Chrome. With apps listed, the pattern is optional: leave it empty to match every link from
+      them. Links whose source app can’t be told, such as ones opened with <code>open</code> in Terminal, never match
+      these rules.
+    </p>
+
     <h4>Test before you rely on it</h4>
     <p>
       Paste a link into <b>Test a URL</b> at the bottom of the Rules tab to see which rule matches and which browser
-      would open. The rule editor has its own test field for the rule you’re working on.
+      would open. When a rule is limited to apps, choose the app the link is clicked in next to the field. The rule editor has its own test field for the rule you’re working on.
     </p>
 
     <h3 id="picker">Choose in the picker</h3>
@@ -319,20 +327,20 @@
     <h3 id="history">Look back at your history</h3>
     <p>
       Choose <b>History…</b> from the menu bar icon to see every link WrangURL has opened, grouped by day.
-      Each row shows the time, the link, the rule that matched it and the browser it went to.
+      Each row shows the time, the app you clicked the link in, the link, the rule that matched it and the browser it went to.
     </p>
 
     <figure class="wide">
       <picture>
         <source srcset="images/history-dark.png" media="(prefers-color-scheme: dark)">
         <img src="images/history-light.png" width="768" height="620" loading="lazy"
-             alt="The History window: links grouped under Today, Yesterday and an earlier date, each with its time, matching rule, browser, and buttons to copy or open it.">
+             alt="The History window: links grouped under Today, Yesterday and an earlier date, each with its time, the icon of the app it was clicked in, matching rule, browser, and buttons to copy or open it.">
       </picture>
-      <figcaption>The History window. Rule names appear next to the browser when a rule matched.</figcaption>
+      <figcaption>The History window. The icon before each link shows the app it was clicked in. Rule names appear next to the browser when a rule matched.</figcaption>
     </figure>
 
     <ul>
-      <li>Type in <b>Search History</b> to filter by link, browser or rule.</li>
+      <li>Type in <b>Search History</b> to filter by link, browser, rule or the app the link came from.</li>
       <li>Use the buttons at the end of a row to copy the link, or to open it again through your rules. Double-clicking a row also opens it again.</li>
       <li>Right-click to open, copy or delete the selected links. Hold <kbd>⌘</kbd> or <kbd>Shift</kbd> to select several.</li>
       <li>Click the trash button in the toolbar to clear the whole history.</li>

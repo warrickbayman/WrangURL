@@ -19,6 +19,7 @@ WrangURL is a macOS menu bar app that opens each link in the right browser. You 
 </p>
 
 - Match URLs with simple patterns like `localhost`, `*.example.com` or `github.com/myorg/*`, or with regular expressions.
+- Limit a rule to links clicked in particular apps, such as sending links from Slack to Chrome.
 - Send a match straight to one browser, or choose from a picker when a rule lists several.
 - Choose what happens to links no rule matches: open them in a fallback browser, or show the picker.
 - Keeps a searchable history of the links it has opened, grouped by day.
@@ -57,7 +58,9 @@ Simple patterns ignore case. A path matches as a prefix, and `*` is a wildcard.
 
 **Regular expressions** can match anywhere in the full URL. They're case-sensitive; start the pattern with `(?i)` to ignore case.
 
-To check your rules, use **Test a URL** at the bottom of the Rules tab. It shows which rule matches and which browser would open. The rule editor has its own test field for the rule you're editing.
+**Clicked In** limits a rule to links clicked in particular apps. Add apps from the list of running apps, or choose one from disk. With apps listed, the pattern is optional: leave it empty to send every link from those apps to the rule's browsers. A rule limited to apps never matches a link whose source app is unknown, such as one opened with `open` in Terminal.
+
+To check your rules, use **Test a URL** at the bottom of the Rules tab. It shows which rule matches and which browser would open. When a rule is limited to apps, choose the app the link is clicked in next to the field. The rule editor has its own test field for the rule you're editing.
 
 ### The browser picker
 
@@ -73,7 +76,9 @@ The picker appears next to the mouse pointer. The app you clicked the link in st
 
 ### History
 
-Choose **History…** in the menu to see every link WrangURL has opened, grouped by day, with the time, the rule that matched and the browser it went to. Search filters by URL, browser or rule. The buttons at the end of each row copy the link or open it again through your rules; double-clicking also opens it again. Right-click to copy, open or delete selected links. The trash button in the toolbar clears everything.
+Choose **History…** in the menu to see every link WrangURL has opened, grouped by day, with the time, the app the link was clicked in, the rule that matched and the browser it went to. Search filters by URL, browser, rule or source app. The buttons at the end of each row copy the link or open it again through your rules; double-clicking also opens it again. Right-click to copy, open or delete selected links. The trash button in the toolbar clears everything.
+
+WrangURL reads the source app from the request macOS sends when a link is clicked. Links opened with `open` in Terminal, or sent by an app that has already quit, show no source app.
 
 History is kept only on this Mac, in `history.json` next to the configuration file, and holds the most recent 5,000 links. Turn it off in **Settings → General**.
 

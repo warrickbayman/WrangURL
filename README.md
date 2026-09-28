@@ -67,7 +67,7 @@ To check your rules, use **Test a URL** at the bottom of the Rules tab. It shows
 
 The picker appears next to the mouse pointer. The app you clicked the link in stays in front.
 
-To choose a browser for a link that a rule would open directly, hold **⌥⌘** (Option-Command) while you click it. The picker then lists every browser, with the rule's browsers (or the fallback browser) first. Change the keys, or turn this off, with **Always ask when holding** in Settings → General. Some apps give modifier-clicks their own meaning, so this only works where the app still hands the link to your default browser.
+To choose a browser for a link that a rule would open directly, hold **⌥⌘** (Option-Command) while you click it. The picker then lists every browser, with the rule's browsers (or the fallback browser) first. To use other keys, click the **Always ask when holding** field in Settings → General, press the modifier keys you want, and let go. The ⓧ button next to it turns this off. Some apps give modifier-clicks their own meaning, so this only works where the app still hands the link to your default browser.
 
 | Key | Action |
 |---|---|

@@ -54,10 +54,13 @@ struct GeneralSettingsView: View {
                 }
                 .pickerStyle(.radioGroup)
 
-                Picker("Always ask when holding", selection: pickerModifiers) {
-                    ForEach(pickerModifierChoices, id: \.rawValue) { keys in
-                        Text(keys.isEmpty ? "Off" : keys.symbols).tag(keys)
-                    }
+                LabeledContent("Always ask when holding") {
+                    ModifierKeysRecorder(keys: pickerModifiers)
+                }
+                if let warning = pickerModifiersWarning {
+                    Label(warning, systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
                 }
             } header: {
                 Text("Routing")
@@ -148,14 +151,14 @@ struct GeneralSettingsView: View {
         return text
     }
 
-    /// The offered combinations, plus the current one if it was set by editing the config file.
-    private var pickerModifierChoices: [ModifierKeys] {
-        var choices: [ModifierKeys] = [AppSettings.defaultPickerModifiers, [.control, .option], [.shift, .command], [.option], [.shift], []]
-        let current = config.config.settings.pickerModifiers
-        if !choices.contains(current) {
-            choices.insert(current, at: choices.count - 1)
+    /// Single keys that other apps already give a meaning when clicking a link.
+    private var pickerModifiersWarning: String? {
+        switch config.config.settings.pickerModifiers {
+        case .control: "⌃-click is a right-click, so links clicked this way never reach WrangURL."
+        case .command: "Terminals such as iTerm2 open links with ⌘-click, so every terminal link will show the picker."
+        case .option: "Safari downloads links you ⌥-click instead of opening them."
+        default: nil
         }
-        return choices
     }
 
     private var pickerModifiers: Binding<ModifierKeys> {

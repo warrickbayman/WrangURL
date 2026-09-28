@@ -28,7 +28,7 @@ App logs use subsystem `com.thepublicgood.wrangurl`. In zsh, `log` is a shell bu
 
 **URL flow.** macOS delivers URLs to `AppDelegate.application(_:open:)` → `URLRouter.handle`. The router queues URLs until `markReady()` in `applicationDidFinishLaunching`, because a cold launch can deliver them early. `URLRouter.preview(_:)` does the decision part:
 1. `RuleMatcher` finds the first enabled rule matching the URL and its source app (`SourceApp`, read from the Apple Event's sender in `application(_:open:)`). It is compiled once per rules array and cached in the router.
-2. `RoutePlanner` decides `.open(browserID)`, `.pick(browserIDs)` or `.noBrowserAvailable`. It applies the fallback browser (configured browser, then Safari, then the first installed one), the unmatched-URL behaviour, removal of uninstalled browsers, and "file URLs go to the fallback".
+2. `RoutePlanner` decides `.open(browserID)`, `.pick(browserIDs)` or `.noBrowserAvailable`. It applies the fallback browser (configured browser, then Safari, then the first installed one), the unmatched-URL behaviour, removal of uninstalled browsers, and "file URLs go to the fallback". Holding exactly `AppSettings.pickerModifiers` (default ⌥⌘) forces `.pick` with every browser; `URLRouter.handle` reads `NSEvent.modifierFlags` on arrival, before any queueing.
 
 The router then either opens the URL via `NSWorkspace` or shows `BrowserPickerController`. The URL testers in Settings call `preview(_:)`, so they can't diverge from real routing. `RoutePlanner`, `RuleMatcher`/`SimplePattern`, `PickerAction` and the `Config` import helpers are deliberately AppKit-free and pure; keep new routing logic there so it stays unit-testable.
 

@@ -53,10 +53,19 @@ struct GeneralSettingsView: View {
                     Text("Ask which browser to use").tag(UnmatchedBehavior.showPicker)
                 }
                 .pickerStyle(.radioGroup)
+
+                LabeledContent("Always ask when holding") {
+                    ModifierKeysRecorder(keys: pickerModifiers)
+                }
+                if let warning = pickerModifiersWarning {
+                    Label(warning, systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
             } header: {
                 Text("Routing")
             } footer: {
-                Text("The fallback browser also opens local HTML files and links whose rule has no installed browser.")
+                Text(routingFooter)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -131,6 +140,32 @@ struct GeneralSettingsView: View {
         var planner = router.planner
         planner.settings.fallbackBrowserID = nil
         return planner.fallbackBrowserID.map(browsers.name(forID:)) ?? "none"
+    }
+
+    private var routingFooter: String {
+        var text = "The fallback browser also opens local HTML files and links whose rule has no installed browser."
+        let keys = config.config.settings.pickerModifiers
+        if !keys.isEmpty {
+            text += " Hold \(keys.symbols) while clicking a link to choose a browser, whatever the rules say."
+        }
+        return text
+    }
+
+    /// Single keys that other apps already give a meaning when clicking a link.
+    private var pickerModifiersWarning: String? {
+        switch config.config.settings.pickerModifiers {
+        case .control: "⌃-click is a right-click, so links clicked this way never reach WrangURL."
+        case .command: "Terminals such as iTerm2 open links with ⌘-click, so every terminal link will show the picker."
+        case .option: "Safari downloads links you ⌥-click instead of opening them."
+        default: nil
+        }
+    }
+
+    private var pickerModifiers: Binding<ModifierKeys> {
+        Binding(
+            get: { config.config.settings.pickerModifiers },
+            set: { keys in config.update { $0.settings.pickerModifiers = keys } }
+        )
     }
 
     private var fallbackBrowserID: Binding<String?> {

@@ -22,6 +22,7 @@ WrangURL is a macOS menu bar app that opens each link in the right browser. You 
 - Limit a rule to links clicked in particular apps, such as sending links from Slack to Chrome.
 - Send a match straight to one browser, or choose from a picker when a rule lists several.
 - Choose what happens to links no rule matches: open them in a fallback browser, or show the picker.
+- Hold ⌥⌘ while clicking any link to choose a browser, whatever the rules say.
 - Keeps a searchable history of the links it has opened, grouped by day.
 - Runs in the menu bar and can open at login.
 
@@ -66,6 +67,8 @@ To check your rules, use **Test a URL** at the bottom of the Rules tab. It shows
 
 The picker appears next to the mouse pointer. The app you clicked the link in stays in front.
 
+To choose a browser for a link that a rule would open directly, hold **⌥⌘** (Option-Command) while you click it. The picker then lists every browser, with the rule's browsers (or the fallback browser) first. To use other keys, click the **Always ask when holding** field in Settings → General, press the modifier keys you want, and let go. The ⓧ button next to it turns this off. Some apps give modifier-clicks their own meaning, so this only works where the app still hands the link to your default browser.
+
 | Key | Action |
 |---|---|
 | `1`–`9` | Open in that browser |
@@ -84,7 +87,7 @@ History is kept only on this Mac, in `history.json` next to the configuration fi
 
 ### Settings and configuration
 
-- **Settings → General** covers the fallback browser, what to do with unmatched links, launch at login, updates, whether URLs appear in the system log, whether to keep a history, and the default browser status.
+- **Settings → General** covers the fallback browser, what to do with unmatched links, the keys that always show the picker, launch at login, updates, whether URLs appear in the system log, whether to keep a history, and the default browser status.
 - WrangURL checks GitHub for new releases with [Sparkle](https://sparkle-project.org). Choose **Check for Updates…** in the menu to check now.
 - If WrangURL stops being the default browser, the menu bar icon changes to ⚠︎.
 - **Import… and Export…** save and load your rules and settings as JSON.

@@ -16,6 +16,11 @@ struct AppSettings: Codable, Equatable, Sendable {
     var logsURLs = true
     /// Whether opened links are recorded in the History window.
     var keepsHistory = true
+    /// Holding exactly these keys when a link arrives shows the picker, whatever the rules say.
+    /// Empty turns this off.
+    var pickerModifiers: ModifierKeys = AppSettings.defaultPickerModifiers
+
+    static let defaultPickerModifiers: ModifierKeys = [.option, .command]
 }
 
 extension AppSettings {
@@ -26,6 +31,8 @@ extension AppSettings {
         hasCompletedOnboarding = try container.decodeIfPresent(Bool.self, forKey: .hasCompletedOnboarding) ?? false
         logsURLs = try container.decodeIfPresent(Bool.self, forKey: .logsURLs) ?? true
         keepsHistory = try container.decodeIfPresent(Bool.self, forKey: .keepsHistory) ?? true
+        pickerModifiers = try container.decodeIfPresent(ModifierKeys.self, forKey: .pickerModifiers)
+            ?? AppSettings.defaultPickerModifiers
     }
 }
 

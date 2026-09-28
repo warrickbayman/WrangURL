@@ -27,6 +27,7 @@ final class URLRouter {
     @ObservationIgnored private let browsers: BrowserRegistry
     @ObservationIgnored private let history: HistoryStore
     @ObservationIgnored private let picker = BrowserPickerController()
+    @ObservationIgnored private let clicks = ClickModifierTracker()
     @ObservationIgnored private var pending: [PendingURL] = []
     @ObservationIgnored private var isReady = false
     @ObservationIgnored private var matcherCache: (rules: [Rule], matcher: RuleMatcher)?
@@ -38,6 +39,11 @@ final class URLRouter {
         self.config = config
         self.browsers = browsers
         self.history = history
+    }
+
+    /// Starts remembering the modifier keys of clicks in other apps. Not called when hosting tests.
+    func startTrackingClicks() {
+        clicks.start()
     }
 
     func markReady() {
@@ -52,7 +58,12 @@ final class URLRouter {
     /// Routes URLs clicked in `source`, the app they came from, if known.
     func handle(_ urls: [URL], from source: SourceApp? = nil) {
         // Read the keys now: by the time a queued URL is routed, the user may have let go.
-        let modifiers = ModifierKeys(NSEvent.modifierFlags)
+        let heldNow = ModifierKeys(NSEvent.modifierFlags)
+        let modifiers = ModifierKeys.forLink(heldNow: heldNow, lastClick: clicks.lastClick, now: ProcessInfo.processInfo.systemUptime)
+        if modifiers != heldNow, let click = clicks.lastClick {
+            let age = ProcessInfo.processInfo.systemUptime - click.time
+            Self.logger.info("Using \(modifiers.symbols, privacy: .public) from a click \(age, format: .fixed(precision: 2))s before the link arrived; held now: \(heldNow.symbols, privacy: .public)")
+        }
         guard isReady else {
             pending.append(contentsOf: urls.map { PendingURL(url: $0, source: source, modifiers: modifiers) })
             Self.logger.info("Queued \(urls.count) URL(s) until launch finishes")

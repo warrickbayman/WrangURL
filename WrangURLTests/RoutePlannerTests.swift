@@ -127,4 +127,26 @@ struct RoutePlannerTests {
         let unknown = try JSONDecoder().decode(AppSettings.self, from: Data(#"{"pickerModifiers": ["option", "hyper"]}"#.utf8))
         #expect(unknown.pickerModifiers == [.option])
     }
+
+    // MARK: Keys held for the click that opened a link
+
+    @Test func recentClickKeysCountAfterRelease() {
+        let click = ModifierClick(keys: [.option, .command], time: 100)
+        #expect(ModifierKeys.forLink(heldNow: [], lastClick: click, now: 101.5) == [.option, .command])
+    }
+
+    @Test func staleClickIsIgnored() {
+        let click = ModifierClick(keys: [.option, .command], time: 100)
+        #expect(ModifierKeys.forLink(heldNow: [], lastClick: click, now: 102.5) == [])
+    }
+
+    @Test func plainClickLeavesHeldKeys() {
+        // A link opened from the keyboard just after an ordinary click.
+        let click = ModifierClick(keys: [], time: 100)
+        #expect(ModifierKeys.forLink(heldNow: [.option, .command], lastClick: click, now: 100.5) == [.option, .command])
+    }
+
+    @Test func heldKeysCountWithoutAClick() {
+        #expect(ModifierKeys.forLink(heldNow: [.shift], lastClick: nil, now: 100) == [.shift])
+    }
 }

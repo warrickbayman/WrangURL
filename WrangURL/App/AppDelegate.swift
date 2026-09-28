@@ -112,6 +112,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func application(_ application: NSApplication, open urls: [URL]) {
-        router.handle(urls)
+        router.handle(urls, from: SourceApp.forCurrentAppleEvent())
     }
 }

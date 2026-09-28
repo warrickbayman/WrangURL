@@ -73,7 +73,9 @@ The picker appears next to the mouse pointer. The app you clicked the link in st
 
 ### History
 
-Choose **History…** in the menu to see every link WrangURL has opened, grouped by day, with the time, the rule that matched and the browser it went to. Search filters by URL, browser or rule. The buttons at the end of each row copy the link or open it again through your rules; double-clicking also opens it again. Right-click to copy, open or delete selected links. The trash button in the toolbar clears everything.
+Choose **History…** in the menu to see every link WrangURL has opened, grouped by day, with the time, the app the link was clicked in, the rule that matched and the browser it went to. Search filters by URL, browser, rule or source app. The buttons at the end of each row copy the link or open it again through your rules; double-clicking also opens it again. Right-click to copy, open or delete selected links. The trash button in the toolbar clears everything.
+
+WrangURL reads the source app from the request macOS sends when a link is clicked. Links opened with `open` in Terminal, or sent by an app that has already quit, show no source app.
 
 History is kept only on this Mac, in `history.json` next to the configuration file, and holds the most recent 5,000 links. Turn it off in **Settings → General**.
 

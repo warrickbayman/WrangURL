@@ -100,7 +100,9 @@ struct HistoryView: View {
 
     /// Opens the links again through the rules, as if they had just been clicked.
     private func open(_ ids: Set<HistoryEntry.ID>) {
-        router.handle(entries(ids).map(\.url))
+        for entry in entries(ids) {
+            router.handle([entry.url], from: entry.sourceApp)
+        }
     }
 
     private func copy(_ ids: Set<HistoryEntry.ID>) {
@@ -115,7 +117,7 @@ struct HistoryView: View {
     }
 }
 
-/// One opened link: time, URL and the browser it went to, with buttons to open or copy it.
+/// One opened link: time, the app it came from, URL and the browser it went to, with buttons to open or copy it.
 private struct HistoryRow: View {
     let entry: HistoryEntry
     let onOpen: () -> Void
@@ -126,6 +128,7 @@ private struct HistoryRow: View {
             Text(entry.date, format: .dateTime.hour().minute())
                 .monospacedDigit()
                 .foregroundStyle(.secondary)
+            SourceAppIcon(source: entry.sourceApp)
             Text(entry.url.absoluteString)
                 .lineLimit(1)
                 .truncationMode(.middle)
@@ -148,5 +151,28 @@ private struct HistoryRow: View {
         .buttonStyle(.borderless)
         .labelStyle(.iconOnly)
         .padding(4)
+    }
+}
+
+/// The icon of the app a link came from, or a placeholder when that isn't known.
+private struct SourceAppIcon: View {
+    @Environment(BrowserRegistry.self) private var browsers
+
+    let source: SourceApp?
+
+    var body: some View {
+        Group {
+            if let source, let icon = browsers.icon(forID: source.id) {
+                Image(nsImage: icon)
+                    .resizable()
+            } else {
+                Image(systemName: "questionmark.app.dashed")
+                    .resizable()
+                    .foregroundStyle(.tertiary)
+                    .padding(2)
+            }
+        }
+        .frame(width: 16, height: 16)
+        .help(source.map { "From \($0.name)" } ?? "Source app unknown")
     }
 }

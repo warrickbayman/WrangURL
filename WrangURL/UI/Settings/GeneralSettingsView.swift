@@ -53,10 +53,16 @@ struct GeneralSettingsView: View {
                     Text("Ask which browser to use").tag(UnmatchedBehavior.showPicker)
                 }
                 .pickerStyle(.radioGroup)
+
+                Picker("Always ask when holding", selection: pickerModifiers) {
+                    ForEach(pickerModifierChoices, id: \.rawValue) { keys in
+                        Text(keys.isEmpty ? "Off" : keys.symbols).tag(keys)
+                    }
+                }
             } header: {
                 Text("Routing")
             } footer: {
-                Text("The fallback browser also opens local HTML files and links whose rule has no installed browser.")
+                Text(routingFooter)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -131,6 +137,32 @@ struct GeneralSettingsView: View {
         var planner = router.planner
         planner.settings.fallbackBrowserID = nil
         return planner.fallbackBrowserID.map(browsers.name(forID:)) ?? "none"
+    }
+
+    private var routingFooter: String {
+        var text = "The fallback browser also opens local HTML files and links whose rule has no installed browser."
+        let keys = config.config.settings.pickerModifiers
+        if !keys.isEmpty {
+            text += " Hold \(keys.symbols) while clicking a link to choose a browser, whatever the rules say."
+        }
+        return text
+    }
+
+    /// The offered combinations, plus the current one if it was set by editing the config file.
+    private var pickerModifierChoices: [ModifierKeys] {
+        var choices: [ModifierKeys] = [AppSettings.defaultPickerModifiers, [.control, .option], [.shift, .command], [.option], [.shift], []]
+        let current = config.config.settings.pickerModifiers
+        if !choices.contains(current) {
+            choices.insert(current, at: choices.count - 1)
+        }
+        return choices
+    }
+
+    private var pickerModifiers: Binding<ModifierKeys> {
+        Binding(
+            get: { config.config.settings.pickerModifiers },
+            set: { keys in config.update { $0.settings.pickerModifiers = keys } }
+        )
     }
 
     private var fallbackBrowserID: Binding<String?> {

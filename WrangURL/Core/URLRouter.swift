@@ -14,13 +14,20 @@ final class URLRouter {
         let ruleName: String?
     }
 
+    /// A URL that arrived before launch finished, with what was known when it arrived.
+    private struct PendingURL {
+        let url: URL
+        let source: SourceApp?
+        let modifiers: ModifierKeys
+    }
+
     private(set) var recent: [Entry] = []
 
     @ObservationIgnored private let config: ConfigStore
     @ObservationIgnored private let browsers: BrowserRegistry
     @ObservationIgnored private let history: HistoryStore
     @ObservationIgnored private let picker = BrowserPickerController()
-    @ObservationIgnored private var pending: [(url: URL, source: SourceApp?)] = []
+    @ObservationIgnored private var pending: [PendingURL] = []
     @ObservationIgnored private var isReady = false
     @ObservationIgnored private var matcherCache: (rules: [Rule], matcher: RuleMatcher)?
 
@@ -37,20 +44,22 @@ final class URLRouter {
         isReady = true
         let queued = pending
         pending.removeAll()
-        for (url, source) in queued {
-            route(url, from: source)
+        for item in queued {
+            route(item.url, from: item.source, heldModifiers: item.modifiers)
         }
     }
 
     /// Routes URLs clicked in `source`, the app they came from, if known.
     func handle(_ urls: [URL], from source: SourceApp? = nil) {
+        // Read the keys now: by the time a queued URL is routed, the user may have let go.
+        let modifiers = ModifierKeys(NSEvent.modifierFlags)
         guard isReady else {
-            pending.append(contentsOf: urls.map { ($0, source) })
+            pending.append(contentsOf: urls.map { PendingURL(url: $0, source: source, modifiers: modifiers) })
             Self.logger.info("Queued \(urls.count) URL(s) until launch finishes")
             return
         }
         for url in urls {
-            route(url, from: source)
+            route(url, from: source, heldModifiers: modifiers)
         }
     }
 
@@ -76,9 +85,11 @@ final class URLRouter {
     }
 
     /// What would happen to a URL clicked in `source`, without opening it. Used by the URL tester.
-    func preview(_ url: URL, from source: SourceApp? = nil) -> (rule: Rule?, decision: RouteDecision) {
+    func preview(
+        _ url: URL, from source: SourceApp? = nil, heldModifiers: ModifierKeys = []
+    ) -> (rule: Rule?, decision: RouteDecision) {
         let rule = matcher.match(url, from: source?.id)
-        return (rule, planner.decide(for: url, matchedRule: rule))
+        return (rule, planner.decide(for: url, matchedRule: rule, heldModifiers: heldModifiers))
     }
 
     /// The URL as it should appear in the log, following the "Include URLs in logs" setting.
@@ -86,9 +97,9 @@ final class URLRouter {
         config.config.settings.logsURLs ? url.absoluteString : "<URL hidden>"
     }
 
-    private func route(_ url: URL, from source: SourceApp?) {
-        let (rule, decision) = preview(url, from: source)
-        Self.logger.info("Received \(self.loggable(url), privacy: .public) from \(source?.id ?? "unknown app", privacy: .public); rule: \(rule?.displayName ?? "none", privacy: .public); decision: \(String(describing: decision), privacy: .public)")
+    private func route(_ url: URL, from source: SourceApp?, heldModifiers: ModifierKeys) {
+        let (rule, decision) = preview(url, from: source, heldModifiers: heldModifiers)
+        Self.logger.info("Received \(self.loggable(url), privacy: .public) from \(source?.id ?? "unknown app", privacy: .public); rule: \(rule?.displayName ?? "none", privacy: .public); modifiers: \(heldModifiers.symbols, privacy: .public); decision: \(String(describing: decision), privacy: .public)")
 
         switch decision {
         case .open(let browserID):
@@ -148,5 +159,15 @@ final class URLRouter {
                 ruleName: rule?.displayName, sourceApp: source
             ))
         }
+    }
+}
+
+private extension ModifierKeys {
+    init(_ flags: NSEvent.ModifierFlags) {
+        self = []
+        if flags.contains(.control) { insert(.control) }
+        if flags.contains(.option) { insert(.option) }
+        if flags.contains(.shift) { insert(.shift) }
+        if flags.contains(.command) { insert(.command) }
     }
 }

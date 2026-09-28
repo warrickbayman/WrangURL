@@ -74,4 +74,57 @@ struct RoutePlannerTests {
         let file = URL(filePath: "/tmp/page.html")
         #expect(planner(unmatched: .showPicker).decide(for: file, matchedRule: rule([firefox])) == .open(browserID: chrome))
     }
+
+    // MARK: Picker modifiers (default ⌥⌘)
+
+    private let forced: ModifierKeys = [.option, .command]
+
+    @Test func modifiersShowPickerWithRuleBrowsersFirst() {
+        let decision = planner().decide(for: web, matchedRule: rule([safari, missing]), heldModifiers: forced)
+        #expect(decision == .pick(browserIDs: [safari, chrome, firefox]))
+    }
+
+    @Test func modifiersShowPickerWithFallbackFirstWhenUnmatched() {
+        let decision = planner(fallback: firefox).decide(for: web, matchedRule: nil, heldModifiers: forced)
+        #expect(decision == .pick(browserIDs: [firefox, chrome, safari]))
+    }
+
+    @Test func modifiersShowPickerForFileURLs() {
+        let file = URL(filePath: "/tmp/page.html")
+        let decision = planner().decide(for: file, matchedRule: rule([firefox]), heldModifiers: forced)
+        #expect(decision == .pick(browserIDs: [chrome, firefox, safari]))
+    }
+
+    @Test func modifiersMustMatchExactly() {
+        let single = rule([firefox])
+        #expect(planner().decide(for: web, matchedRule: single, heldModifiers: [.option]) == .open(browserID: firefox))
+        #expect(planner().decide(for: web, matchedRule: single, heldModifiers: [.option, .command, .shift]) == .open(browserID: firefox))
+    }
+
+    @Test func emptyPickerModifiersTurnTheShortcutOff() {
+        var planner = planner()
+        planner.settings.pickerModifiers = []
+        #expect(planner.decide(for: web, matchedRule: rule([firefox]), heldModifiers: []) == .open(browserID: firefox))
+    }
+
+    @Test func modifiersWithOneBrowserOpenIt() {
+        let decision = planner(fallback: nil, installed: [safari]).decide(for: web, matchedRule: nil, heldModifiers: forced)
+        #expect(decision == .open(browserID: safari))
+    }
+
+    @Test func pickerModifiersRoundTripAsKeyNames() throws {
+        var settings = AppSettings()
+        settings.pickerModifiers = [.command, .shift]
+        let data = try JSONEncoder().encode(settings)
+        let json = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        #expect(json["pickerModifiers"] as? [String] == ["shift", "command"])
+        #expect(try JSONDecoder().decode(AppSettings.self, from: data).pickerModifiers == [.shift, .command])
+    }
+
+    @Test func pickerModifiersDefaultToOptionCommandAndIgnoreUnknownKeys() throws {
+        let missing = try JSONDecoder().decode(AppSettings.self, from: Data("{}".utf8))
+        #expect(missing.pickerModifiers == [.option, .command])
+        let unknown = try JSONDecoder().decode(AppSettings.self, from: Data(#"{"pickerModifiers": ["option", "hyper"]}"#.utf8))
+        #expect(unknown.pickerModifiers == [.option])
+    }
 }

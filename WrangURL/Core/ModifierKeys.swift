@@ -47,3 +47,26 @@ extension ModifierKeys: Codable {
         try container.encode(Self.keys.filter { contains($0.key) }.map(\.name))
     }
 }
+
+/// A mouse click somewhere on the system, and the modifier keys held for it.
+struct ModifierClick: Equatable, Sendable {
+    var keys: ModifierKeys
+    /// Seconds since the Mac started, like `NSEvent.timestamp` and `ProcessInfo.systemUptime`.
+    var time: TimeInterval
+}
+
+extension ModifierKeys {
+    /// How long after a click a link can arrive and still count as coming from it.
+    static let clickWindow: TimeInterval = 2
+
+    /// The keys that count for a link arriving at `now`. Some apps pass links on slowly, and
+    /// the user has often let go of the keys by the time one arrives, so the keys held for a
+    /// recent click win. Otherwise, such as for a link opened from the keyboard, the keys held
+    /// now count.
+    static func forLink(heldNow: ModifierKeys, lastClick: ModifierClick?, now: TimeInterval) -> ModifierKeys {
+        if let click = lastClick, !click.keys.isEmpty, (0...clickWindow).contains(now - click.time) {
+            return click.keys
+        }
+        return heldNow
+    }
+}

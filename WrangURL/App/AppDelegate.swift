@@ -59,6 +59,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         guard !Self.isRunningTests else { return }
 
+        router.startTrackingClicks()
+
         #if DEBUG
         // Launch with `-DebugAppearance <light|dark>` to override the system appearance, e.g. for screenshots.
         switch UserDefaults.standard.string(forKey: "DebugAppearance") {

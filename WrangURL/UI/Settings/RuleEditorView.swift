@@ -319,6 +319,7 @@ private struct SourceAppsSection: View {
                 }
             }
         }
+        .fileDialogDefaultDirectory(URL(filePath: "/Applications", directoryHint: .isDirectory))
     }
 
     private func add(_ app: SourceApp) {

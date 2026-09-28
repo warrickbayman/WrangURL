@@ -4,6 +4,12 @@ All notable changes to WrangURL are listed here, newest first. When a release is
 Changelog workflow (`.github/workflows/changelog.yml`) adds its section from the pull requests merged
 since the previous release. Edit entries by hand afterwards if they need rewording.
 
+## [v0.5.1](https://github.com/warrickbayman/WrangURL/releases/tag/v0.5.1) - 2026-09-28
+
+### Changed
+
+- Remember the keys held for the click that opened a link. ([#14](https://github.com/warrickbayman/WrangURL/pull/14))
+
 ## [v0.5.0](https://github.com/warrickbayman/WrangURL/releases/tag/v0.5.0) - 2026-09-28
 
 ### Changed

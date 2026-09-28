@@ -4,6 +4,13 @@ All notable changes to WrangURL are listed here, newest first. When a release is
 Changelog workflow (`.github/workflows/changelog.yml`) adds its section from the pull requests merged
 since the previous release. Edit entries by hand afterwards if they need rewording.
 
+## [v0.5.0](https://github.com/warrickbayman/WrangURL/releases/tag/v0.5.0) - 2026-09-28
+
+### Changed
+
+- Remove the fallback browser and unmatched-link pickers from the menu. ([#12](https://github.com/warrickbayman/WrangURL/pull/12))
+- Add a modifier key to always show the browser picker when clicking links. ([#13](https://github.com/warrickbayman/WrangURL/pull/13))
+
 ## [v0.4.0](https://github.com/warrickbayman/WrangURL/releases/tag/v0.4.0) - 2026-09-28
 
 ### Changed

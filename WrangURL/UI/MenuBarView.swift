@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct MenuBarView: View {
-    @Environment(ConfigStore.self) private var config
     @Environment(BrowserRegistry.self) private var browsers
     @Environment(URLRouter.self) private var router
     @Environment(DefaultBrowserManager.self) private var defaultBrowser
@@ -24,25 +23,6 @@ struct MenuBarView: View {
         }
         if let error = defaultBrowser.lastError {
             Text(error)
-        }
-
-        Divider()
-
-        Picker("Fallback Browser", selection: fallbackBrowserID) {
-            ForEach(browsers.browsers) { browser in
-                Label {
-                    Text(browser.name)
-                } icon: {
-                    if let icon = browsers.menuIcon(forID: browser.id) {
-                        Image(nsImage: icon)
-                    }
-                }
-                .tag(Optional(browser.id))
-            }
-        }
-        Picker("When No Rule Matches", selection: unmatchedBehavior) {
-            Text("Open in Fallback Browser").tag(UnmatchedBehavior.openFallback)
-            Text("Ask Which Browser to Use").tag(UnmatchedBehavior.showPicker)
         }
 
         Divider()
@@ -87,20 +67,6 @@ struct MenuBarView: View {
             browsers.refresh()
             loginItem.refresh()
         }
-    }
-
-    private var fallbackBrowserID: Binding<String?> {
-        Binding(
-            get: { config.config.settings.fallbackBrowserID },
-            set: { id in config.update { $0.settings.fallbackBrowserID = id } }
-        )
-    }
-
-    private var unmatchedBehavior: Binding<UnmatchedBehavior> {
-        Binding(
-            get: { config.config.settings.unmatchedBehavior },
-            set: { behavior in config.update { $0.settings.unmatchedBehavior = behavior } }
-        )
     }
 
     private func recentTitle(for entry: URLRouter.Entry) -> String {

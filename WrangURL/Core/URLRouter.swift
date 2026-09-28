@@ -75,9 +75,9 @@ final class URLRouter {
         return matcher
     }
 
-    /// What would happen to a URL, without opening it. Used by the URL tester.
-    func preview(_ url: URL) -> (rule: Rule?, decision: RouteDecision) {
-        let rule = matcher.match(url)
+    /// What would happen to a URL clicked in `source`, without opening it. Used by the URL tester.
+    func preview(_ url: URL, from source: SourceApp? = nil) -> (rule: Rule?, decision: RouteDecision) {
+        let rule = matcher.match(url, from: source?.id)
         return (rule, planner.decide(for: url, matchedRule: rule))
     }
 
@@ -87,7 +87,7 @@ final class URLRouter {
     }
 
     private func route(_ url: URL, from source: SourceApp?) {
-        let (rule, decision) = preview(url)
+        let (rule, decision) = preview(url, from: source)
         Self.logger.info("Received \(self.loggable(url), privacy: .public) from \(source?.id ?? "unknown app", privacy: .public); rule: \(rule?.displayName ?? "none", privacy: .public); decision: \(String(describing: decision), privacy: .public)")
 
         switch decision {

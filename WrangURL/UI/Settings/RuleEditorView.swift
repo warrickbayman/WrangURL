@@ -43,6 +43,8 @@ struct RuleEditorView: View {
                     patternHint
                 }
 
+                SourceAppsSection(apps: $draft.sourceApps)
+
                 Section {
                     if draft.browserIDs.isEmpty {
                         Text("No browsers yet")
@@ -88,7 +90,7 @@ struct RuleEditorView: View {
             }
             .padding(12)
         }
-        .frame(width: 520, height: 500)
+        .frame(width: 520, height: 560)
         #if DEBUG
         // Launch with `-DebugInsertionIndex <n>` to preview the drop indicator (for UI work).
         .onAppear {
@@ -100,7 +102,7 @@ struct RuleEditorView: View {
     // MARK: - Pattern
 
     private var patternError: PatternError? {
-        RuleMatcher.validate(draft.pattern, kind: draft.kind)
+        RuleMatcher.validate(draft)
     }
 
     private var patternPrompt: String {
@@ -240,12 +242,88 @@ struct RuleEditorView: View {
         guard patternError == nil else { return (false, "Fix the pattern first") }
         var rule = draft
         rule.isEnabled = true
-        let matches = RuleMatcher(rules: [rule]).match(url) != nil
-        return (matches, matches ? "This rule matches" : "This rule doesn't match")
+        guard RuleMatcher(rules: [rule]).match(url, from: rule.sourceApps.first?.id) != nil else {
+            return (false, "This rule doesn't match")
+        }
+        return (true, rule.sourceApps.isEmpty ? "This rule matches" : "This rule matches when clicked in \(rule.sourceAppNames)")
     }
 
     private var canSave: Bool {
         patternError == nil && !draft.browserIDs.isEmpty
+    }
+}
+
+/// The apps a rule is limited to, with a menu to add running apps or choose one from disk.
+private struct SourceAppsSection: View {
+    @Environment(BrowserRegistry.self) private var browsers
+    @Binding var apps: [SourceApp]
+    @State private var isChoosingApp = false
+
+    var body: some View {
+        Section {
+            if apps.isEmpty {
+                Text("Any app")
+                    .foregroundStyle(.secondary)
+            }
+            ForEach(apps, id: \.id) { app in
+                HStack {
+                    BrowserIcon(id: app.id, size: 20)
+                    Text(app.name)
+                    Spacer()
+                    Button { apps.removeAll { $0.id == app.id } } label: { Image(systemName: "minus.circle.fill") }
+                        .buttonStyle(.borderless)
+                        .foregroundStyle(.secondary)
+                        .help("Remove")
+                }
+            }
+            addMenu
+        } header: {
+            Text("Clicked In")
+        } footer: {
+            Text("Limit the rule to links clicked in these apps. With apps listed, the pattern is optional; "
+                 + "leave it empty to match every link from them.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var addMenu: some View {
+        let running = SourceApp.running.filter { app in !apps.contains { $0.id == app.id } }
+        return Menu("Add App") {
+            Section("Running Apps") {
+                ForEach(running, id: \.id) { app in
+                    Button {
+                        add(app)
+                    } label: {
+                        Label {
+                            Text(app.name)
+                        } icon: {
+                            if let icon = browsers.menuIcon(forID: app.id) {
+                                Image(nsImage: icon)
+                            }
+                        }
+                    }
+                }
+            }
+            Divider()
+            Button("Choose App…") { isChoosingApp = true }
+        }
+        .fixedSize()
+        .fileImporter(isPresented: $isChoosingApp, allowedContentTypes: [.application], allowsMultipleSelection: true) { result in
+            guard case .success(let urls) = result else { return }
+            for url in urls {
+                let didAccess = url.startAccessingSecurityScopedResource()
+                defer { if didAccess { url.stopAccessingSecurityScopedResource() } }
+                if let app = SourceApp.app(at: url) {
+                    add(app)
+                }
+            }
+        }
+    }
+
+    private func add(_ app: SourceApp) {
+        guard !apps.contains(where: { $0.id == app.id }) else { return }
+        apps.append(app)
     }
 }
 

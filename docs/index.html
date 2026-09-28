@@ -286,10 +286,18 @@
       <code>(?i)^https://meet\.google\.com/</code>.
     </p>
 
+    <h4>Limit a rule to apps</h4>
+    <p>
+      Add apps under <b>Clicked In</b> to make a rule apply only to links clicked in those apps, for example to send
+      links from Slack to Chrome. With apps listed, the pattern is optional: leave it empty to match every link from
+      them. Links whose source app can’t be told, such as ones opened with <code>open</code> in Terminal, never match
+      these rules.
+    </p>
+
     <h4>Test before you rely on it</h4>
     <p>
       Paste a link into <b>Test a URL</b> at the bottom of the Rules tab to see which rule matches and which browser
-      would open. The rule editor has its own test field for the rule you’re working on.
+      would open. When a rule is limited to apps, choose the app the link is clicked in next to the field. The rule editor has its own test field for the rule you’re working on.
     </p>
 
     <h3 id="picker">Choose in the picker</h3>
